@@ -1,6 +1,8 @@
 local gameNetwork = require "gameNetwork"
 local widget = require "widget"
 
+gameNetwork.init("google")
+
 local leaderboardId = "" -- Your leaderboard id here
 local achievementId = "" -- Your achievement id here
 
@@ -12,7 +14,8 @@ gameNetwork.request("login",
 local left = display.screenOriginX + display.viewableContentWidth/100
 local top = display.screenOriginY + display.viewableContentHeight/100
 local width = display.viewableContentWidth - display.viewableContentWidth/100
-local size = display.viewableContentHeight/20
+local size = display.viewableContentHeight/15
+local buttonTextSize = display.viewableContentWidth/20
 
 local scoreText = display.newText("Score: ", left, top, native.systemFont, size)
 
@@ -41,24 +44,26 @@ local function unlockAchievementListener(event)
 end
 
 local function showLeaderboardListener(event)
-	gameNetwork.show("achievements")
+	gameNetwork.show("leaderboards")
 end
 
 local function showAchievementsListener(event)
-	gameNetwork.show("leaderboards")
+	gameNetwork.show("achievements")
 end
 
 local loginLogoutButton
 local function loginLogoutListener(event)
-	local function loginListener(event)
-		if event.isError == nil then
-			loginLogoutButton.text = "Logout"
+	local function loginListener(event1)
+		if event1.isError then
+			loginLogoutButton:setLabel("Login")
+		else
+			loginLogoutButton:setLabel("Logout")
 		end
 	end
 
 	if gameNetwork.request("isConnected") then
 		gameNetwork.request("logout")
-		loginLogoutButton.text = "Login"
+		loginLogoutButton:setLabel("Login")
 	else
 		gameNetwork.request("login",
 			{
@@ -75,6 +80,7 @@ local scoreSubmitButton = widget.newButton
 	width = width,
 	height = size,
 	label = "Submit Score",
+	fontSize = buttonTextSize,
 	onRelease = submitScoreListener,
 }
 
@@ -86,6 +92,7 @@ local achievementSubmitButton = widget.newButton
 	width = width,
 	height = size,
 	label = "Unlock Achievement",
+	fontSize = buttonTextSize,
 	onRelease = unlockAchievementListener,
 }
 
@@ -97,6 +104,7 @@ local showLeaderboardButton = widget.newButton
 	width = width,
 	height = size,
 	label = "Show Leaderboard",
+	fontSize = buttonTextSize,
 	onRelease = showLeaderboardListener,
 }
 
@@ -108,16 +116,22 @@ local showAchievementButton = widget.newButton
 	width = width,
 	height = size,
 	label = "Show Achievements",
+	fontSize = buttonTextSize,
 	onRelease = showAchievementsListener,
 }
 
 --login button
-local loginLogoutButton = widget.newButton
+loginLogoutButton = widget.newButton
 {
-	top = display.screenOriginY + display.viewableContentHeight + size + size,
+	top = display.screenOriginY + display.viewableContentHeight - size,
 	left = left,
 	width = width,
 	height = size,
+	label = "Login",
+	fontSize = buttonTextSize,
 	onRelease = loginLogoutListener,
 }
-loginLogoutListener(nil)
+
+if gameNetwork.request("isConnected") then
+	loginLogoutButton:setLabel("Logout")
+end

@@ -52,6 +52,7 @@ public class UnlockAchievementListener extends Listener implements OnAchievement
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);
+					CoronaLua.deleteRef(L, fListener);
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}

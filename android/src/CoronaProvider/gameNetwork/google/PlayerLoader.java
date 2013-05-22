@@ -117,6 +117,7 @@ public class PlayerLoader {
 
 					try {
 						CoronaLua.dispatchEvent(L, fListener, 0);
+						CoronaLua.deleteRef(L, fListener);
 					} catch(Exception ex) {
 						ex.printStackTrace();
 					}

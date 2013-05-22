@@ -33,6 +33,9 @@ _[String][api.type.String]._ The following commands are supported for the corres
 * unlockAchievement
 * loadAchievementDescriptions
 * loadLeaderboardCategories
+* isConnected
+* login
+* logout
 
 ##### params ~^(optional)^~
 The following parameters are supported for the corresponding game networks:
@@ -223,3 +226,19 @@ Example "loadLeaderboardCategories" request:
         },
 	}
 
+**isConnected:** Checks to see if the user is currently logged into Google Play game services.  This function returns immediately with the result so there is no need to supply it with a callback.  Returns true if the current user is currently logged in and false if the user isn't.
+
+**login:** Tries to log the user into Google Play game services.  The table takes a parameter called userInitated.  This parameter defaults to true.  If this parameter is set to true then it will try to resolve any problems with the login process so for example it will show the login popup.  If it is set to false then it will just try to connect without trying to resolve any errors.  Setting this to false is useful for automatically logging in at the start of the app without annoying the user to log in every time.
+Example "login" request:
+
+    gameNetwork.request( "login",
+    {
+        userInitiated=true,
+        listener=requestCallback
+    })
+
+event in callback listener is a boolean flag that states if there with an error with the sign in process.
+
+* isError(boolean)
+
+**logout:** Logs the user out of Google Play game services.  This function does not accept a callback.

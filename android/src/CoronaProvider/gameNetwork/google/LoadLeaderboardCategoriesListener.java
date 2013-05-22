@@ -53,6 +53,7 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 					L.setField(-2, "data");
 
 					CoronaLua.dispatchEvent( L, fListener, 0);
+					CoronaLua.deleteRef(L, fListener);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

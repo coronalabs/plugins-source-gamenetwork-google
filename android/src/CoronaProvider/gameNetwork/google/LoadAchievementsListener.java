@@ -53,6 +53,7 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);
+					CoronaLua.deleteRef(L, fListener);
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
