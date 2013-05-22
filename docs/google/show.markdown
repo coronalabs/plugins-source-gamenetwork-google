@@ -28,10 +28,6 @@ _[String][api.type.String]._ Supports the following strings:
 * `"leaderboards"`
 * `"achievements"`
 
-##### data ~^(optional)^~
-_[Table][api.type.Table]._ Please see the **Examples** section below for the data table format required by Game Center.
-
-
 ## Examples
 
 **Google Play game services:**
