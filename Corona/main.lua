@@ -19,9 +19,11 @@ local width = display.viewableContentWidth - display.viewableContentWidth/100
 local size = display.viewableContentHeight/15
 local buttonTextSize = display.viewableContentWidth/20
 
-local scoreText = display.newText("Score: ", left, top, native.systemFont, size)
+local topText = display.newText(system.getInfo("appName") .. " " .. system.getInfo("build"), left, top, native.systemFont, size)
 
-local scoreTextField = native.newTextField( scoreText.x + scoreText.width/2, top , width - scoreText.width * 1.1, size)
+local scoreText = display.newText("Score: ", left, topText.y + topText.height/2, native.systemFont, size)
+
+local scoreTextField = native.newTextField( scoreText.x + scoreText.width/2, scoreText.y - scoreText.height/2 , width - scoreText.width * 1.1, size)
 scoreTextField.inputType = "number"
 
 -- Submits the score from the scoreTextField into the leaderboard
@@ -80,7 +82,7 @@ end
 
 local scoreSubmitButton = widget.newButton
 {
-	top = top + scoreText.height,
+	top = scoreTextField.y + scoreText.height,
 	left = left,
 	width = width,
 	height = size,
@@ -88,7 +90,6 @@ local scoreSubmitButton = widget.newButton
 	fontSize = buttonTextSize,
 	onRelease = submitScoreListener,
 }
-
 
 local achievementSubmitButton = widget.newButton
 {
