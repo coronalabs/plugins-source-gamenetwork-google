@@ -40,9 +40,15 @@ public class UnlockAchievementListener extends Listener implements OnAchievement
 			public void executeUsing(CoronaRuntime runtime) {
 				LuaState L = runtime.getLuaState();
 				CoronaLua.newEvent(L, "unlockAchievement");
-				
+
+				L.newTable(1, 0);
+				L.newTable(0, 1);
+
 				L.pushString(achievementId);
 				L.setField(-2, "achievementId");
+
+				L.rawSet(-2, 1);
+				L.setField(-2, "data");
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);

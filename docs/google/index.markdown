@@ -1,78 +1,51 @@
-# CoronaProvider.ads.inmobi.*
+
+# gameNetwork.*
 
 > --------------------- ------------------------------------------------------------------------------------------
-> __Type__              [library][api.type.library]
+> __Type__              [Library][api.type.Library]
 > __Revision__          [REVISION_LABEL](REVISION_URL)
-> __Keywords__          ads, inmobi, provider
+> __Keywords__          gameNetwork, game center, game services
 > __Sample code__       
 > __See also__          
-> __Availability__      Starter, Pro, Enterprise
 > --------------------- ------------------------------------------------------------------------------------------
 
 ## Overview
 
-## Sign Up
+Corona's game network API allows access to social gaming features such as public leaderboards and achievements.
 
-To use the SERVICE_NAME service, please [sign up](CORONA_REFERRAL_URL) for an account.
+**NOTE:** Using the gameNetwork API will enable Corona Launchpad regardless of the setting in config.lua.
 
-## Platforms
+#### Google Play game services
 
-The following platforms are supported:
-
-* Android
-* iOS
-
-## Syntax
-
-You access this plugin by passing the appropriate provider name to the [ads library][api.library.ads]:
-
-	local ads = require "ads"
-	ads.init( "inmobi", appID, adListener )
+This is currently a feature that is only supported on Android. It is not supported by the Corona Simulator.
 
 ## Functions
 
-The inmobi plugin does not provide any additional functionality beyond the core functionality provided by the [ads library][api.library.ads].
+#### [gameNetwork.init()][plugin.gameNetwork-google.init]
 
-#### [ads library][api.library.ads.init]:
+#### [gameNetwork.request()][plugin.gameNetwork-google.request]
 
-#### [ads library][api.library.ads.show]:
+#### [gameNetwork.show()][plugin.gameNetwork-google.show]
 
-#### [ads library][api.library.ads.hide]:
+## build.settings
 
-## Project Settings
+The following build.settings section is required to for Google Play game services
 
-### SDK
-
-When you build using the Corona Simulator, the server automatically takes care of integrating the plugin into your project. 
-
-All you need to do is add an entry into a `plugins` table of your `build.settings`. The following is an example of a minimal `build.settings` file:
-
-``````
+``````lua
 settings =
 {
+	android =
+	{
+		googlePlayGamesAppId = "123456789012" -- Your Google Play Games App Id
+	},
 	plugins =
 	{
 		-- key is the name passed to Lua's 'require()'
-		["CoronaProvider.ads.inmobi"] =
+		["CoronaProvider.gameNetwork.google"] =
 		{
 			-- required
 			publisherId = "com.coronalabs",
 		},
-	},		
+	},
 }
-
 ``````
-
-### Enterprise
-
-TBD
-
-## Sample Code
-
-You can access sample code [here](SAMPLE_CODE_URL).
-
-## Support
-
-More support is available from the InMobi team:
-
-* [http://inmobi.com](http://inmobi.com)
