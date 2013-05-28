@@ -178,7 +178,6 @@ public class LuaLoader implements JavaFunction {
 		int requestCode = activity.registerActivityResultHandler(new CoronaActivity.OnActivityResultHandler() {
 			@Override
 			public void onHandleActivityResult(CoronaActivity activity, int requestCode, int resultCode, android.content.Intent data) {
-				activity.unregisterActivityResultHandler(requestCode);
 				helper.onActivityResult(requestCode, resultCode, data);
 			}
 		});
