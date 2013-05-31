@@ -131,7 +131,7 @@ public class LuaLoader implements JavaFunction {
 					L.pushString( "init" );
 					L.setField( -2, "type");
 
-					L.pushBoolean( isError);
+					L.pushBoolean( !isError );
 					L.setField( -2, "data");
 
 					if ( isError ) {

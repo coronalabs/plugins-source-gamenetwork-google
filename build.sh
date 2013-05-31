@@ -2,7 +2,7 @@
 
 path=`dirname $0`
 
-PLUGIN_NAME=ads-inmobi
+PLUGIN_NAME=gameNetwork-google
 
 #
 # Checks exit value for error

@@ -76,7 +76,7 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     PlusClient mPlusClient = null;
     AppStateClient mAppStateClient = null;
     
-    public static int TRIES;
+    private int mTries;
     // What clients we wrap (OR-able values, so we can use as flags too)
     public final static int CLIENT_NONE = 0x00;
     public final static int CLIENT_GAMES = 0x01;
@@ -135,7 +135,7 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     public GameHelper(Activity activity) {
         mActivity = activity;
         mContext = activity;
-        TRIES = 0;
+        mTries = 0;
     }
 
     public void setup(GameHelperListener listener) {
@@ -168,7 +168,21 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         mScopes = new String[scopesVector.size()];
         scopesVector.copyInto(mScopes);
         
+        final android.view.View aView = new android.view.View(mContext);
         if (0 != (clientsToUse & CLIENT_GAMES)) {
+            //We need to add this view otherwise the activity might not find a view to show the achievements popup which then causes
+            //game services to crash
+            com.ansca.corona.CoronaEnvironment.getCoronaActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    android.widget.AbsoluteLayout fAbsoluteLayout = new android.widget.AbsoluteLayout(com.ansca.corona.CoronaEnvironment.getCoronaActivity());
+                    com.ansca.corona.CoronaEnvironment.getCoronaActivity().getOverlayView().addView(fAbsoluteLayout);
+                    android.widget.RelativeLayout fAdViewGroup = new android.widget.RelativeLayout(com.ansca.corona.CoronaEnvironment.getCoronaActivity());
+                    fAdViewGroup.addView(aView);
+                    fAbsoluteLayout.addView(fAdViewGroup);        
+                }
+            });
+
             debugLog("onCreate: creating GamesClient");
             mGamesClient = new GamesClient.Builder(mContext, this, this)
                 .setGravityForPopups(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
@@ -438,6 +452,7 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             errorDialog = makeSignInErrorDialog(SIGN_IN_ERROR_MESSAGE);
         }
 
+        mTries = 0;
         mAutoSignIn = false;
         errorDialog.show();
         if (mListener != null) mListener.onSignInFailed();
@@ -457,14 +472,15 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             if (responseCode == Activity.RESULT_OK) {
                 // Ready to try to connect again.
                 debugLog("responseCode == RESULT_OK. So connecting.");
-                TRIES = 0;
+                mTries = 0;
                 connectCurrentClient();
             }
             else {
                 // Whatever the problem we were trying to solve, it was not solved.
                 // So give up and show an error message.
-                if(TRIES < 1) {
+                if(mTries < 1) {
                     beginUserInitiatedSignIn();
+                    mTries++;
                 } else {
                     debugLog("responseCode != RESULT_OK, so not reconnecting.");
                     giveUp();

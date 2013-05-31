@@ -60,7 +60,7 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 			}
 
 			private void dumpOnTable(LuaState L, Leaderboard leaderboard, int index) {
-				L.newTable(0, 4);
+				L.newTable(0, 2);
 
 				L.pushString(leaderboard.getLeaderboardId());
 				L.setField(-2, "category");

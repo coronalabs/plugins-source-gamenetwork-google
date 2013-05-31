@@ -36,17 +36,17 @@ Google Play game services is currently only avaliable on Android.
 	gameNetwork.init( "google" [, initCallback] )
 
 ##### initCallback ~^(optional)^~
-_[Listener][api.type.Listener]._ If "google" is specified as `providerName`, this is a callback function. On successful login, `event.data` will be 'true'. On unsuccessful init, `event.data` will be 'false'. When problems such as network errors occur, `event.errorCode` (integer) and `event.errorMessage` (string) will be defined. 
+_[Listener][api.type.Listener]._ If "google" is specified as `providerName`, this is a callback function. On successful login, `event.isError` will be 'true'. On unsuccessful init, `event.isError` will be 'nil'. When problems such as network errors occur, `event.errorCode` (integer) and `event.errorMessage` (string) will be defined. 
 
 `````lua
 local gameNetwork = require "gameNetwork"
 
 local function initCallback( event )
-	if event.data then
+	if not event.isError then
 		loggedIntoGC = true
         native.showAlert( "Success!", "", { "OK" } )
 	end
 end
 
-gameNetwork.init( "google", initCallback )
+gameNetwork.init( "gameNetwork", {listener = initCallback} )
 `````
