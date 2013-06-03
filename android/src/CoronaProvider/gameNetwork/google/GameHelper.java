@@ -187,6 +187,7 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             mGamesClient = new GamesClient.Builder(mContext, this, this)
                 .setGravityForPopups(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                 .setScopes(mScopes)
+                .setViewForPopups(aView)
                 .create();
         }
         
