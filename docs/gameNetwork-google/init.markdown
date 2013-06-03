@@ -48,5 +48,5 @@ local function initCallback( event )
 	end
 end
 
-gameNetwork.init( "gameNetwork", {listener = initCallback} )
+gameNetwork.init( "gameNetwork", initCallback )
 `````

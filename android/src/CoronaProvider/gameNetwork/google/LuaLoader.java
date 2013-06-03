@@ -88,75 +88,78 @@ public class LuaLoader implements JavaFunction {
 	public int init(LuaState L) {
 		int listener = -1;
 		
-		if (L.isTable( -1 )) {
-			L.getField(-1, "listener");
-			if (CoronaLua.isListener( L, -1, "" )) {
-				listener = CoronaLua.newRef( L, -1 );
-			}
-			L.pop(1);
+		int top = L.getTop();
+
+		if (CoronaLua.isListener( L, -1, "" )) {
+			listener = CoronaLua.newRef( L, -1 );
 		}
 
-		final int finalListener = listener;
+		L.setTop(top);
 
-		CoronaRuntimeTask task = new CoronaRuntimeTask() {
-			@Override
-			public void executeUsing(CoronaRuntime runtime) {
-				try {
+		if (listener > 0) {
+			final int finalListener = listener;
 
-					CoronaActivity activity = CoronaEnvironment.getCoronaActivity();
+			CoronaRuntimeTask task = new CoronaRuntimeTask() {
+				@Override
+				public void executeUsing(CoronaRuntime runtime) {
+					try {
 
-					int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+						CoronaActivity activity = CoronaEnvironment.getCoronaActivity();
 
-					boolean isError = false;
-					String errorMessage = "";
+						int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
 
-					//TODO: modifiy this to integrate with GameHelper
-					if (result == ConnectionResult.SERVICE_MISSING) {
-						isError = true;
-						errorMessage = "Service Missing";
-					} else if (result == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
-						isError = true;
-						errorMessage = "Service Version Update Required";
-					} else if (result == ConnectionResult.SERVICE_DISABLED) {
-						isError = true;
-						errorMessage = "Service Disabled";
-					} else if (result == ConnectionResult.SERVICE_INVALID) {
-						isError = true;
-						errorMessage = "Service Invalid";
+						boolean isError = false;
+						String errorMessage = "";
+
+						//TODO: modifiy this to integrate with GameHelper
+						if (result == ConnectionResult.SERVICE_MISSING) {
+							isError = true;
+							errorMessage = "Service Missing";
+						} else if (result == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+							isError = true;
+							errorMessage = "Service Version Update Required";
+						} else if (result == ConnectionResult.SERVICE_DISABLED) {
+							isError = true;
+							errorMessage = "Service Disabled";
+						} else if (result == ConnectionResult.SERVICE_INVALID) {
+							isError = true;
+							errorMessage = "Service Invalid";
+						}
+
+						LuaState L = runtime.getLuaState();
+						CoronaLua.newEvent( L, "init" );
+
+						L.pushString( "init" );
+						L.setField( -2, "type");
+
+						L.pushBoolean( !isError );
+						L.setField( -2, "data");
+
+						if ( isError ) {
+							L.pushBoolean( isError );
+							L.setField( -2, "isError" );
+
+							L.pushString( errorMessage );
+							L.setField( -2, "errorMessage" );
+
+							L.pushNumber( result );
+							L.setField( -2, "errorCode" );
+						}
+
+						if (finalListener > 0) {
+							CoronaLua.dispatchEvent( L, finalListener, 0);
+						}
+						
+					} catch (Exception ex) {
+						ex.printStackTrace();
 					}
-
-					LuaState L = runtime.getLuaState();
-					CoronaLua.newEvent( L, "init" );
-
-					L.pushString( "init" );
-					L.setField( -2, "type");
-
-					L.pushBoolean( !isError );
-					L.setField( -2, "data");
-
-					if ( isError ) {
-						L.pushBoolean( isError );
-						L.setField( -2, "isError" );
-
-						L.pushString( errorMessage );
-						L.setField( -2, "errorMessage" );
-
-						L.pushNumber( result );
-						L.setField( -2, "errorCode" );
-					}
-
-					if (finalListener > 0) {
-						CoronaLua.dispatchEvent( L, finalListener, 0);
-					}
-					
-				} catch (Exception ex) {
-					ex.printStackTrace();
 				}
-			}
-		};
+			};
 
-		fDispatcher.send(task);
+			fDispatcher.send(task);
 
+		}		
+		
 		return 0;
 	}
 
