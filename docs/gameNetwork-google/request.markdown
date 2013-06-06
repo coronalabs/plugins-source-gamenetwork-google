@@ -44,7 +44,11 @@ The following parameters are supported for the corresponding game networks:
 
 **setHighScore:** Sets a high score for the currently logged in user for the specified leaderboard (category). If the high score is not higher than the one currently on the server, the server will keep the highest value.
 
-This function corresponds to Apple's reportScoreWithCompletionHandler. The nomenclature deviates in this case to provide consistency with our existing gameNetwork APIs.
+event.data in callback listener is an arroy of items (tables) that have the following properties:
+* playerID (string)
+* category (string)
+* value (number)
+* formattedValue (string)
 
 Example "setHighScore" request:
 
@@ -127,8 +131,6 @@ have the following properties:
 * playerID (string)
 * alias (string)
 
-Each item (table) in the array corresponds to Apple's GKPlayer class
-
 example:
 event.data[3].alias
 
@@ -172,7 +174,7 @@ Example "unlockAchievement" request.
 	{
         achievement =
         {
-            identifier="com.appletest.one_tap",
+            identifier="CY_w895w9w55w454",
         },
         listener=requestCallback
 	})
@@ -213,15 +215,15 @@ Example "loadLeaderboardCategories" request:
 	event.data =
 	{
         [1] = {
-            category = "com.appledts.EasyTapList",
+            category = "CY_a49t8h4t43t43t",
             title = "Easy"
         },
         [2] = {
-            category = "com.appledts.HardTapList",
+            category = "CY_egr983ygEF4sed",
             title = "Hard"
         },
         [3] = {
-            category = "com.appledts.AwesomeTapList",
+            category = "CY_w4aERG4843EFEF",
             title = "Awesome"
         },
 	}

@@ -9,14 +9,6 @@
 // e.g. [Lua] require "plugin.library"
 package CoronaProvider.gameNetwork.google;
 
-import CoronaProvider.gameNetwork.google.GameHelper;
-import CoronaProvider.gameNetwork.google.UnlockAchievementListener;
-import CoronaProvider.gameNetwork.google.LoadAchievementsListener;
-import CoronaProvider.gameNetwork.google.LoadTopScoresListener;
-import CoronaProvider.gameNetwork.google.SignInListener;
-import CoronaProvider.gameNetwork.google.LoadLeaderboardCategoriesListener;
-import CoronaProvider.gameNetwork.google.PlayerLoader;
-
 import java.lang.Double;
 import java.util.HashSet;
 
@@ -308,7 +300,7 @@ public class LuaLoader implements JavaFunction {
 			}
 			L.setTop(top);
 			if (isConnected()) {
-				helper.getGamesClient().submitScore(leaderBoardId, score);
+				helper.getGamesClient().submitScoreImmediate(new SetHighScoreListener(fDispatcher, listener), leaderBoardId, score);
 			}
 			
 		} else if (requestedAction.equals("isConnected")) {
