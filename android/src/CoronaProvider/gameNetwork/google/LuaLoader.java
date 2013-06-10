@@ -339,7 +339,7 @@ public class LuaLoader implements JavaFunction {
 
 			if (isConnected()) {
 				PlayerLoader playerLoader = new PlayerLoader(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
-				playerLoader.loadPlayers(nameSet);
+				playerLoader.loadPlayers(nameSet, false);
 			}
 
 		} else if (requestedAction.equals("loadLocalPlayer")) {
@@ -347,7 +347,7 @@ public class LuaLoader implements JavaFunction {
 				HashSet<String> nameSet = new HashSet<String>();
 				nameSet.add(helper.getGamesClient().getCurrentPlayerId());
 				PlayerLoader playerLoader = new PlayerLoader(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
-				playerLoader.loadPlayers(nameSet);
+				playerLoader.loadPlayers(nameSet, true);
 			}
 		} else if (requestedAction.equals("loadScores")) {
 			String leaderBoardId = "";

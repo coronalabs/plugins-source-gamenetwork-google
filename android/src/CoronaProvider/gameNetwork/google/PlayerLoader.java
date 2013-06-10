@@ -42,6 +42,7 @@ public class PlayerLoader {
 	protected int fListener;
 	protected GamesClient fGamesClient;
 	protected String fEventName;
+	protected boolean fLocalPlayer;
 
 	public PlayerLoader(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GamesClient gamesClient, String eventName) {
 		fPlayerSet = new HashSet<Player>();
@@ -51,25 +52,32 @@ public class PlayerLoader {
 		fEventName = eventName;
 	}
 
-	public void loadPlayers(HashSet<String> nameSet) {
+	/**
+	 * @Param nameSet HashSet<String> this is the name of all the players to load
+	 * @Param localPlayer boolean if its loading the localPlayer then event.data.alias will be populated instead of event.data[1].alias
+	 *        this is to match the functionality on iOS
+	 */
+	public void loadPlayers(HashSet<String> nameSet, boolean localPlayer) {
 		fNameSet = nameSet;
 
 		HashSet<String> deepCopy = new HashSet<String>();
 		Iterator<String> iter = fNameSet.iterator();
-		while(iter.hasNext()) {
+		while( iter.hasNext()) {
 			String stringCopy = new String(iter.next());
 			deepCopy.add(stringCopy);
 		}		
 
+		fLocalPlayer = localPlayer;
+
 		iter = deepCopy.iterator();
-		while(iter.hasNext()) {
+		while (iter.hasNext()) {
 			fGamesClient.loadPlayer(new LoadPlayerListener(), iter.next());
 		}
 	}
 
 	public class LoadPlayerListener implements OnPlayersLoadedListener {
 		public void onPlayersLoaded(int statusCode, PlayerBuffer buffer) {
-			for(int i = 0; i<buffer.getCount(); i++) {
+			for (int i = 0; i<buffer.getCount(); i++) {
 				fPlayerSet.add(buffer.get(i));
 				fNameSet.remove(buffer.get(i).getPlayerId());
 			}
@@ -84,33 +92,39 @@ public class PlayerLoader {
 				return;
 			}
 
-			final HashSet<Player> playerSet = fPlayerSet;
+			final HashSet<Player> finalPlayerSet = fPlayerSet;
 			CoronaRuntimeTask task = new CoronaRuntimeTask() {
 				@Override
 				public void executeUsing(CoronaRuntime runtime) {
-					Iterator<Player> iter = playerSet.iterator();
+					Iterator<Player> iter = finalPlayerSet.iterator();
 					Player player;
 
 					LuaState L = runtime.getLuaState();
 
 					CoronaLua.newEvent(L, fEventName);
 
-					L.newTable(playerSet.size(), 0);
+					L.newTable(finalPlayerSet.size(), 0);
 
 					int count = 1;
-					while(iter.hasNext()) {
+					while (iter.hasNext()) {
 						player = iter.next();
 
-						L.newTable(0, 2);
-
+						//This is done because on iOS loadLocalPlayer's data is in event.data instead of event.data[1]
+						if (!fLocalPlayer && finalPlayerSet.size() == 1) {
+							L.newTable(0, 2);
+						}
+						
 						L.pushString(player.getPlayerId());
 						L.setField(-2, "playerID");
 
 						L.pushString(player.getDisplayName());
 						L.setField(-2, "alias");
 
-						L.rawSet(-2, count);
-						count++;
+						//This is done because on iOS loadLocalPlayer's data is in event.data instead of event.data[1]
+						if (!fLocalPlayer && finalPlayerSet.size() == 1) {
+							L.rawSet(-2, count);
+							count++;
+						}
 					}
 
 					L.setField(-2, "data");
