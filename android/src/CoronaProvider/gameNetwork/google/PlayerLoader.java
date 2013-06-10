@@ -103,6 +103,9 @@ public class PlayerLoader {
 
 					CoronaLua.newEvent(L, fEventName);
 
+					L.pushString("loadPlayers");
+					L.setField(-2, "type");
+
 					L.newTable(finalPlayerSet.size(), 0);
 
 					int count = 1;

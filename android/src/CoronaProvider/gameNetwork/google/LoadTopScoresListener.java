@@ -50,6 +50,9 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 				LeaderboardScore leaderBoardScore;
 				CoronaLua.newEvent(L, "loadScores");
 				
+				L.pushString("loadScores");
+				L.setField(-2, "type");
+
 				L.newTable(scores.getCount(), 0);
 
 				for(int i = 0; i<scores.getCount(); i++) {

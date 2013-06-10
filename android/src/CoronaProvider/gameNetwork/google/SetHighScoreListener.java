@@ -42,6 +42,10 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 				LuaState L = runtime.getLuaState();
 
 				CoronaLua.newEvent(L, "setHighScore");
+
+				L.pushString("setHighScore");
+				L.setField(-2, "type");
+
 				L.newTable(4, 0);
 
 				L.pushString(finalScoreResult.getLeaderboardId());
@@ -55,7 +59,7 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 				L.setField(-2, "formattedValue");
 
 				L.pushString(finalScoreResult.getPlayerId());
-				L.setField(-2, "playerId");				
+				L.setField(-2, "playerId");
 
 				L.setField(-2, "data");
 

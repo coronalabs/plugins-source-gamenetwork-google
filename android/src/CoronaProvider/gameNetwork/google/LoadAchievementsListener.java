@@ -41,6 +41,9 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 				LuaState L = runtime.getLuaState();
 				Achievement achievement = null;
 				CoronaLua.newEvent(L, "loadAchievements");
+
+				L.pushString("loadAchievements");
+				L.setField(-2, "type");
 				
 				L.newTable(buffer.getCount(), 0);
 

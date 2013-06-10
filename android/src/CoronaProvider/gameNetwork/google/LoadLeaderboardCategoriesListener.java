@@ -38,12 +38,15 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 			@Override
 			public void executeUsing(CoronaRuntime runtime) {
 				try {
+					Leaderboard leaderboard;
+					
 					LuaState L = runtime.getLuaState();
 					CoronaLua.newEvent( L, "loadLeaderboardCategories" );
 
-					Leaderboard leaderboard;
+					L.pushString("loadLeaderboardCategories");
+					L.setField(-2, "type");
 
-					L.newTable(buffer.getCount(), 0);
+					L.newTable(buffer.getCount() + 1, 0);
 
 					for(int i = 0; i<buffer.getCount(); i++) {
 						leaderboard = buffer.get(i);
