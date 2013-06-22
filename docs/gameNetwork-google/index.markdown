@@ -50,3 +50,7 @@ settings =
 	},
 }
 ``````
+
+## Sample Code
+
+You can access sample code [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google).
