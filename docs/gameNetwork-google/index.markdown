@@ -7,7 +7,7 @@
 > __Keywords__          gameNetwork, game center, game services
 > __Sample code__       
 > __See also__          
-> __Availability__      Pro, Enterprise
+> __Availability__      Starter, Pro, Enterprise
 > --------------------- ------------------------------------------------------------------------------------------
 
 ## Overview
