@@ -45,6 +45,9 @@ local function initCallback( event )
 	if not event.isError then
 		loggedIntoGC = true
         native.showAlert( "Success!", "", { "OK" } )
+    else
+    	native.showAlert( "Failed!", event.errorMessage, {"OK"})
+    	print("Error Code: ", event.errorCode)
 	end
 end
 

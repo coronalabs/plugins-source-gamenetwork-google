@@ -34,7 +34,7 @@ import com.google.android.gms.games.PlayerBuffer;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.GamesClient;
 
-public class PlayerLoader {
+public class PlayerLoaderManager {
 
 	protected HashSet<String> fNameSet;
 	protected HashSet<Player> fPlayerSet;
@@ -44,7 +44,7 @@ public class PlayerLoader {
 	protected String fEventName;
 	protected boolean fLocalPlayer;
 
-	public PlayerLoader(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GamesClient gamesClient, String eventName) {
+	public PlayerLoaderManager(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GamesClient gamesClient, String eventName) {
 		fPlayerSet = new HashSet<Player>();
 		fDispatcher = _dispatcher;
 		fListener = _listener;
@@ -60,6 +60,7 @@ public class PlayerLoader {
 	public void loadPlayers(HashSet<String> nameSet, boolean localPlayer) {
 		fNameSet = nameSet;
 
+		// We do all this nonsense because iOS 
 		HashSet<String> deepCopy = new HashSet<String>();
 		Iterator<String> iter = fNameSet.iterator();
 		while( iter.hasNext()) {
@@ -103,8 +104,8 @@ public class PlayerLoader {
 
 					CoronaLua.newEvent(L, fEventName);
 
-					L.pushString("loadPlayers");
-					L.setField(-2, "type");
+					L.pushString(fEventName);
+					L.setField(-2, Listener.TYPE);
 
 					L.newTable(finalPlayerSet.size(), 0);
 
@@ -113,24 +114,24 @@ public class PlayerLoader {
 						player = iter.next();
 
 						//This is done because on iOS loadLocalPlayer's data is in event.data instead of event.data[1]
-						if (!fLocalPlayer && finalPlayerSet.size() == 1) {
+						if (!fLocalPlayer && finalPlayerSet.size() > 1) {
 							L.newTable(0, 2);
 						}
 						
 						L.pushString(player.getPlayerId());
-						L.setField(-2, "playerID");
+						L.setField(-2, Listener.PLAYER_ID);
 
 						L.pushString(player.getDisplayName());
-						L.setField(-2, "alias");
+						L.setField(-2, Listener.ALIAS);
 
 						//This is done because on iOS loadLocalPlayer's data is in event.data instead of event.data[1]
-						if (!fLocalPlayer && finalPlayerSet.size() == 1) {
+						if (!fLocalPlayer && finalPlayerSet.size() > 1) {
 							L.rawSet(-2, count);
 							count++;
 						}
 					}
 
-					L.setField(-2, "data");
+					L.setField(-2, Listener.DATA);
 
 					try {
 						CoronaLua.dispatchEvent(L, fListener, 0);

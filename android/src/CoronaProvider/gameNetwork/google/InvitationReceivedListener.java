@@ -20,43 +20,48 @@ import com.ansca.corona.CoronaRuntime;
 import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 import com.ansca.corona.CoronaRuntimeTask;
 
-import com.google.android.gms.games.achievement.OnAchievementUpdatedListener;
+import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 
-
-public class UnlockAchievementListener extends Listener implements OnAchievementUpdatedListener {
-	public UnlockAchievementListener(CoronaRuntimeTaskDispatcher _dispatcher, int _listener) {
+public class InvitationReceivedListener extends Listener implements OnInvitationReceivedListener {
+	public InvitationReceivedListener(CoronaRuntimeTaskDispatcher _dispatcher, int _listener) {
 		super(_dispatcher, _listener);
 	}
 
-	public void onAchievementUpdated(int _statusCode, String _achievementId) {
+	public void onInvitationReceived(Invitation invitation) {
 		if (fListener < 0) {
 			return;
 		}
 
-		final String achievementId = _achievementId;
-
+		final Invitation finalInvitation = invitation;
 		CoronaRuntimeTask task = new CoronaRuntimeTask() {
 			@Override
 			public void executeUsing(CoronaRuntime runtime) {
 				LuaState L = runtime.getLuaState();
-				CoronaLua.newEvent(L, "unlockAchievement");
+				CoronaLua.newEvent(L, "invitationReceived");
 
-				L.pushString("unlockAchievement");
+				L.pushString("invitationReceived");
 				L.setField(-2, TYPE);
+				
+				L.newTable();
 
-				L.newTable(1, 0);
+				L.pushString(finalInvitation.getInvitationId());
+				L.setField(-2, RoomManager.ROOM_ID);
 
-				L.pushString(achievementId);
-				L.setField(-2, "achievementId");
+				L.pushString(finalInvitation.getInviter().getDisplayName());
+				L.setField(-2, ALIAS);
+
+				L.pushString(finalInvitation.getInviter().getPlayer().getPlayerId());
+				L.setField(-2, PLAYER_ID);
 
 				L.setField(-2, DATA);
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);
-					CoronaLua.deleteRef(L, fListener);
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
+				
 			}
 		};
 		fDispatcher.send(task);

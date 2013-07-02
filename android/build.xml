@@ -6,6 +6,7 @@
          Version Control Systems. -->
     <property file="local.properties" />
 
+    <property file="secure.properties" />
     <!-- The ant.properties file can be created by you. It is only edited by the
          'android' tool to add properties to it.
          This is the place to change some Ant specific build properties.

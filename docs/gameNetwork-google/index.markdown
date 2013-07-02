@@ -53,4 +53,5 @@ settings =
 
 ## Sample Code
 
-You can access sample code [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google).
+You can access sample code for leaderboards and achievements [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google).
+You can access sample code for real time multiplayer [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google-gemwars).

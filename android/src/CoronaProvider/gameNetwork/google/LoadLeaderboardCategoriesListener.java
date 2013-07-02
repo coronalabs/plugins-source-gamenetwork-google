@@ -44,7 +44,7 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 					CoronaLua.newEvent( L, "loadLeaderboardCategories" );
 
 					L.pushString("loadLeaderboardCategories");
-					L.setField(-2, "type");
+					L.setField(-2, TYPE);
 
 					L.newTable(buffer.getCount() + 1, 0);
 
@@ -53,7 +53,7 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 						dumpOnTable(L, leaderboard, i+1);
 					}
 
-					L.setField(-2, "data");
+					L.setField(-2, DATA);
 
 					CoronaLua.dispatchEvent( L, fListener, 0);
 					CoronaLua.deleteRef(L, fListener);

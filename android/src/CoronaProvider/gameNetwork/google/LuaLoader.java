@@ -10,6 +10,7 @@
 package CoronaProvider.gameNetwork.google;
 
 import java.lang.Double;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import android.app.Activity;
@@ -28,6 +29,8 @@ import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 import com.ansca.corona.CoronaRuntimeTask;
 
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
+import com.google.android.gms.games.multiplayer.realtime.Room;
+import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.ConnectionResult;
 
@@ -122,10 +125,10 @@ public class LuaLoader implements JavaFunction {
 						CoronaLua.newEvent( L, "init" );
 
 						L.pushString( "init" );
-						L.setField( -2, "type");
+						L.setField( -2, Listener.TYPE);
 
 						L.pushBoolean( !isError );
-						L.setField( -2, "data");
+						L.setField( -2, Listener.DATA);
 
 						if ( isError ) {
 							L.pushBoolean( isError );
@@ -157,13 +160,15 @@ public class LuaLoader implements JavaFunction {
 
 	public int login(int _listener, boolean userInitiated) {
 		CoronaActivity activity = CoronaEnvironment.getCoronaActivity();
+		SignInListener signInListener = new SignInListener(fDispatcher, _listener);
 		if (isConnected() && activity != null) {
+			signInListener.onSignInSucceeded();
 			return 0;
 		}
 
 		helper = new GameHelper(activity);
-		helper.setup(new SignInListener(fDispatcher, _listener), GameHelper.CLIENT_GAMES | GameHelper.CLIENT_PLUS);
-		
+		helper.setup(signInListener, GameHelper.CLIENT_GAMES | GameHelper.CLIENT_PLUS);
+
 		if (!userInitiated) {
 			helper.getGamesClient().connect();
 			helper.getPlusClient().connect();
@@ -200,17 +205,18 @@ public class LuaLoader implements JavaFunction {
 	}
 
 	public int show(LuaState L) {
+		int listener = -1;
 		int index = -1;
 		String leaderBoardId = "";
 
 		int top = L.getTop();
 
-		if (L.isTable( index )) {
+		if (L.isTable(index)) {
 			L.getField(-1, "listener");
-			if (CoronaLua.isListener( L, -1, "googlePlayGames" )) {
-				fListener = CoronaLua.newRef( L, -1 );
+			if (CoronaLua.isListener( L, -1, "googlePlayGames")) {
+				listener = CoronaLua.newRef( L, -1 );
 			}
-
+			index--;
 		}
 
 		L.setTop(top);
@@ -219,28 +225,102 @@ public class LuaLoader implements JavaFunction {
 		whatToShow = L.toString(index);
 		CoronaActivity activity = CoronaEnvironment.getCoronaActivity();
 
-		if (whatToShow.equals("achievements") && isConnected() && activity != null) {
+		boolean checks = isConnected() && activity != null;
+
+		if (isConnected() && activity != null) {
 			final GameHelper finalHelper = helper;
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (CoronaEnvironment.getCoronaActivity() != null) {
-						CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAchievementsIntent(), 123);
+			if (whatToShow.equals("achievements")) {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (CoronaEnvironment.getCoronaActivity() != null) {
+							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAchievementsIntent(), 123);
+						}
 					}
-				}
-			});
-			CoronaEnvironment.getCoronaActivity().startActivityForResult(helper.getGamesClient().getAchievementsIntent(), 123);
-		} else if (whatToShow.equals("leaderboards") && isConnected() && activity != null) {
-			final GameHelper finalHelper = helper;
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (CoronaEnvironment.getCoronaActivity() != null) {
-						CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAllLeaderboardsIntent(), 123);
+				});
+			} else if (whatToShow.equals("leaderboards")) {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (CoronaEnvironment.getCoronaActivity() != null) {
+							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAllLeaderboardsIntent(), 123);
+						}
+						
 					}
+				});
+			} else if (whatToShow.equals("selectPlayers")) {
+				int min = -1;
+				int max = -1;
 					
+				if (L.isTable(-1)) {
+					L.getField(-1, "minPlayers");
+					if(L.isNumber(-1)) {
+						min = (int)L.toNumber(-1);
+						L.pop(1);
+					}
+
+					L.getField(-1, "maxPlayers");
+					if(L.isNumber(-1)) {
+						max = (int)L.toNumber(-1);
+						L.pop(1);
+					}
 				}
-			});
+
+				if (min > -1 && max > -1) {
+					final int finalRequestCode = activity.registerActivityResultHandler(new SelectPlayersResultHandler(fDispatcher, listener));
+					final int finalMin = min;
+					final int finalMax = max;
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (CoronaEnvironment.getCoronaActivity() != null) {
+								CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getSelectPlayersIntent(finalMin, finalMax), finalRequestCode);
+							}
+						}
+					});	
+				}
+
+			} else if (whatToShow.equals("waitingRoom")) {
+				String roomId = null;
+				int minToStart = 0;
+				if (L.isTable(-1)) {
+					L.getField(-1, RoomManager.ROOM_ID);
+					roomId = L.toString(-1);
+
+					L.pop(1);
+
+					L.getField(-1, "minPlayers");
+					if (L.isNumber(-1)) {
+						minToStart = (int)L.toNumber(-1);
+					}
+
+				}
+
+				if (roomId != null) {
+					final int finalRequestCode = activity.registerActivityResultHandler(new WaitingRoomResultHandler(fDispatcher, listener, finalHelper.getGamesClient()));
+					final Room room = RoomManager.getRoom(roomId);
+					final int finalMinToStart = minToStart;
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (CoronaEnvironment.getCoronaActivity() != null && room != null) {
+								CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getRealTimeWaitingRoomIntent(room, finalMinToStart), finalRequestCode);
+							}
+						}
+					});
+				}
+
+			} else if (whatToShow.equals("invitations")) {
+				final int finalRequestCode = activity.registerActivityResultHandler(new InvitationResultHandler(fDispatcher, listener));
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (CoronaEnvironment.getCoronaActivity() != null) {
+							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getInvitationInboxIntent(), finalRequestCode);
+						}
+					}
+				});
+			}
 		}
 		
 		return 0;
@@ -338,7 +418,7 @@ public class LuaLoader implements JavaFunction {
 			L.setTop(top);
 
 			if (isConnected()) {
-				PlayerLoader playerLoader = new PlayerLoader(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
+				PlayerLoaderManager playerLoader = new PlayerLoaderManager(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
 				playerLoader.loadPlayers(nameSet, false);
 			}
 
@@ -346,7 +426,7 @@ public class LuaLoader implements JavaFunction {
 			if (isConnected()) {
 				HashSet<String> nameSet = new HashSet<String>();
 				nameSet.add(helper.getGamesClient().getCurrentPlayerId());
-				PlayerLoader playerLoader = new PlayerLoader(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
+				PlayerLoaderManager playerLoader = new PlayerLoaderManager(fDispatcher, listener, helper.getGamesClient(), "loadPlayers");
 				playerLoader.loadPlayers(nameSet, true);
 			}
 		} else if (requestedAction.equals("loadScores")) {
@@ -435,7 +515,150 @@ public class LuaLoader implements JavaFunction {
 			if (isConnected()) {
 				helper.getGamesClient().loadLeaderboardMetadata(new LoadLeaderboardCategoriesListener(fDispatcher, listener));
 			}
+		} else if (requestedAction.equals("createRoom")) {
+			if (isConnected()) {
+				ArrayList<String> playerIds = new ArrayList<String>();
+				int maxAutoMatchPlayers = 0;
+				int minAutoMatchPlayers = 0;
+
+				int top = L.getTop();
+				if (L.isTable(-1)) {
+					L.getField(-1, "playerIDs");
+					if (L.isTable(-1)) {
+						//TODO: iterate as table
+						int arrayLength = L.length(-1);
+						if (arrayLength>0) {
+							for (int i = 1; i <= arrayLength; i++) {
+								L.rawGet(-1, i);
+								playerIds.add(L.toString(-1));
+								L.pop(1);
+							}
+						}
+					}
+					L.pop(1);
+
+					L.getField(-1, "maxAutoMatchPlayers");
+					maxAutoMatchPlayers = (int)L.toNumber(-1);
+					L.pop(1);
+
+					L.getField(-1, "minAutoMatchPlayers");
+					minAutoMatchPlayers = (int)L.toNumber(-1);
+				}
+				L.setTop(top);			
+
+				RoomManager roomManager = RoomManager.getRoomManager(fDispatcher, listener, helper.getGamesClient());
+				MessageManager messageManager = MessageManager.getMessageManager(fDispatcher, listener, helper.getGamesClient());
+				RoomConfig.Builder roomConfig = RoomConfig.builder(roomManager);
+				if (playerIds.size() > 0) {
+					roomConfig.addPlayersToInvite(playerIds);
+				}
+
+				if (minAutoMatchPlayers > 0 || maxAutoMatchPlayers > 0) {
+					roomConfig.setAutoMatchCriteria(RoomConfig.createAutoMatchCriteria(minAutoMatchPlayers, maxAutoMatchPlayers, 0));
+				}
+
+				roomConfig.setMessageReceivedListener(messageManager);
+				roomConfig.setSocketCommunicationEnabled(false);
+				helper.getGamesClient().createRoom(roomConfig.build());
+			}
+		} else if (requestedAction.equals("joinRoom")) {
+			if (isConnected()) {
+				String roomId = null;
+				int top = L.getTop();
+				if (L.isTable(-1)) {
+					L.getField(-1, RoomManager.ROOM_ID);
+					if (L.isString(-1)) {
+						roomId = L.toString(-1);
+					}
+				}
+				L.setTop(top);
+
+				if (roomId != null) {
+					RoomManager roomManager = RoomManager.getRoomManager(fDispatcher, listener, helper.getGamesClient());
+					MessageManager messageManager = MessageManager.getMessageManager(fDispatcher, listener, helper.getGamesClient());
+					RoomConfig.Builder roomConfig = RoomConfig.builder(roomManager);
+					roomConfig.setInvitationIdToAccept(roomId);
+					roomConfig.setSocketCommunicationEnabled(false);
+					roomConfig.setMessageReceivedListener(messageManager);
+					helper.getGamesClient().joinRoom(roomConfig.build());
+				}
+			}
+		} else if (requestedAction.equals("sendMessage")) {
+			if (isConnected()) {
+				ArrayList<String> playerIds = new ArrayList<String>();
+				String message = null;
+				String roomId = null;
+				boolean isReliable = true;
+				int top = L.getTop();
+				if (L.isTable(-1)) {
+					L.getField(-1, "playerIDs");
+					if (L.isTable(-1)) {
+						//TODO: iterate as table
+						int arrayLength = L.length(-1);
+						if (arrayLength>0) {
+							for (int i = 1; i <= arrayLength; i++) {
+								L.rawGet(-1, i);
+								playerIds.add(L.toString(-1));
+								L.pop(1);
+							}
+						}
+					}
+					L.pop(1);
+
+					L.getField(-1, RoomManager.ROOM_ID);
+					if (L.isString(-1)) {
+						roomId = L.toString(-1);
+					}
+					L.pop(1);
+
+					L.getField(-1, "message");
+					if (L.isString(-1)) {
+						message = L.toString(-1);
+					}
+					L.pop(1);
+
+					L.getField(-1, "reliable");
+					if(L.isBoolean(-1)) {
+						isReliable = L.toBoolean(-1);
+					}
+					L.pop(1);
+				}
+
+				L.setTop(top);
+				if (playerIds != null && message != null && roomId != null) {
+					MessageManager messageManager = MessageManager.getMessageManager(fDispatcher, listener, helper.getGamesClient());
+					messageManager.sendMessage(playerIds, message, roomId, isReliable);
+				}
+			}
+		} else if (requestedAction.equals("leaveRoom")) {
+			if (isConnected()) {
+				String roomId = null;
+				int top = L.getTop();
+				if (L.isTable(-1)) {
+					L.getField(-1, RoomManager.ROOM_ID);
+					if (L.isString(-1)) {
+						roomId = L.toString(-1);
+					}
+				}
+				L.setTop(top);
+
+				if (roomId != null) {
+					RoomManager roomManager = RoomManager.getRoomManager(fDispatcher, listener, helper.getGamesClient());
+					helper.getGamesClient().leaveRoom(roomManager, roomId);
+				}
+			}
+		} else if (requestedAction.equals("setMessageReceivedListener")) {
+			MessageManager.setMessageListener(listener);
+		} else if (requestedAction.equals("setRoomListener")) {
+			RoomManager.setRoomListener(listener);
+		} else if (requestedAction.equals("setInvitationReceivedListener")) {
+			if (isConnected()) {
+				helper.getGamesClient().registerInvitationListener(new InvitationReceivedListener(fDispatcher, listener));
+			}
+		} else if (requestedAction.equals("loadFriends")) {
+			(new LoadInvitablePlayersManager(fDispatcher, listener, helper.getGamesClient())).load();
 		}
+
 		return returnValues;
 	}
 

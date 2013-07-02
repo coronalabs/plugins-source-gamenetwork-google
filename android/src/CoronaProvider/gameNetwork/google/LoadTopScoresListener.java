@@ -51,7 +51,7 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 				CoronaLua.newEvent(L, "loadScores");
 				
 				L.pushString("loadScores");
-				L.setField(-2, "type");
+				L.setField(-2, TYPE);
 
 				L.newTable(scores.getCount(), 0);
 
@@ -60,7 +60,7 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 					dumpOnTable(L, leaderBoardScore, i+1);
 				}
 
-				L.setField(-2, "data");
+				L.setField(-2, DATA);
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);
@@ -75,7 +75,7 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 				L.newTable(0, 7);
 
 				L.pushString(player.getPlayerId());
-				L.setField(-2, "playerID");
+				L.setField(-2, PLAYER_ID);
 
 				L.pushString(fCategory);
 				L.setField(-2, "category");

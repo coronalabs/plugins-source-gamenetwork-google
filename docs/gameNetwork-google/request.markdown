@@ -36,6 +36,12 @@ _[String][api.type.String]._ The following commands are supported for the corres
 * isConnected
 * login
 * logout
+* createRoom
+* joinRoom
+* leaveRoom
+* sendMessage
+* setMessageReceivedListener
+* setInvitationRecievedListener
 
 ##### params ~^(optional)^~
 The following parameters are supported for the corresponding game networks:
@@ -55,7 +61,7 @@ Example "setHighScore" request:
 	gameNetwork.request( "setHighScore",
 	{
         localPlayerScore = { category="Cy_sd893DEewf3", value=25 },
-        listener=requestCallback
+        listener = requestCallback
 	})
 
 'localPlayerScore' is a required table..
@@ -86,13 +92,13 @@ Example "loadScores" request:
 	{
         leaderboard =
         {
-            category="Cy_SLDWING4334h",
-            playerScope="Global",   -- Global, FriendsOnly
-            timeScope="AllTime",    -- AllTime, Week, Today
-            range={1,5},
-            playerCentered=true,
+            category = "Cy_SLDWING4334h",
+            playerScope = "Global",   -- Global, FriendsOnly
+            timeScope = "AllTime",    -- AllTime, Week, Today
+            range = {1,5},
+            playerCentered = true,
         },
-        listener=requestCallback
+        listener = requestCallback
 	})
 
 'leaderboard' is a required table.
@@ -140,12 +146,32 @@ Example "loadPlayers" request:
 	{
         playerIDs =
         {
-            "G:123456789",
-            "G:1234567890",
-            "G:0123456789"
+            "45987354897345345",
+            "32238975789573445",
+            "17891241248435990"
         },
-        listener=requestCallback
+        listener = requestCallback
 	})
+
+**loadFriends:** Requests a list of players the logged in player can invite to a game.
+
+event.data in callback listener is an array of items that
+have the following properties:
+
+* playerID (string)
+* alias (string)
+
+example:
+event.data[3].alias
+
+Example "loadFriends" request:
+
+    gameNetwork.request( "loadFriends",
+    {
+        listener = requestCallback
+    })
+
+
 
 **loadAchievements:** Loads a list of the user's available achievements for the app and returns an array of items (tables) representing each achievement in the callback listener.  This call returns the same thing as loadAchievementDescriptions.
 
@@ -174,7 +200,7 @@ Example "unlockAchievement" request.
 	{
         achievement =
         {
-            identifier="CY_w895w9w55w454",
+            identifier = "CY_w895w9w55w454",
         },
         listener=requestCallback
 	})
@@ -235,8 +261,8 @@ Example "login" request:
 
     gameNetwork.request( "login",
     {
-        userInitiated=true,
-        listener=requestCallback
+        userInitiated = true,
+        listener = requestCallback
     })
 
 event in callback listener is a boolean flag that states if there with an error with the sign in process.
@@ -244,3 +270,122 @@ event in callback listener is a boolean flag that states if there with an error 
 * isError(boolean)
 
 **logout:** Logs the user out of Google Play game services.  This function does not accept a callback.
+
+**createRoom:** Invites players to a real time multiplayer game.  Setting a listener when calling this will override any previously set room listener.
+Example "createRoom" request:
+
+    local function requestCallback(event)
+        print(event.data.roomID) -- This is the id of the room that was created
+    end
+
+    gameNetwork.request( "createRoom",
+    {
+        listener = requestCallback, -- Including this will override what is set in setRoomListener
+        playerIDs = -- array of players to invite
+        {
+            "45987354897345345",
+            "32238975789573445",
+            "17891241248435990"
+        },
+        maxAutoMatchPlayers = 3, -- Optional, defaults to 0
+        minAutoMatchPlayers = 1, -- Optional, defaults to 0
+    })
+
+**joinRoom:** Joins a room that has already been created.  Setting a listener when calling this will override any previously set room listener.
+Example "joinRoom" request:
+
+    local function requestCallback(event)
+        print(event.data.roomID) -- This is the id of the room that was created
+    end
+
+    gameNetwork.request( "joinRoom",
+    {
+        listener = requestCallback, -- Including this will override what is set in setRoomListener
+        roomID = "o345t9348th" -- Id of the room you want to join
+    })
+
+**leaveRoom:** Leave the room that the player is already in and close any connections.  Setting a listener when calling this will override any previously set room listener.
+Example "leaveRoom" request:
+
+    local function requestCallback(event)
+        print(event.data.roomID) -- This is the id of the room that was created
+    end
+
+    gameNetwork.request( "leaveRoom",
+    {
+        listener = requestCallback, -- Including this will override what is set in setRoomListener
+        roomID = "o345t9348th" -- Id of the room you want to leave
+    })
+
+**setRoomListener:** Sets the listener that will be called when an event for a room happens.  Setting this will override any listener set from createRoom, joinRoom, and leaveRoom.
+The event for  this listener is structured at follows
+event.type
+event.data : array which contains the list of players affected eg. event.data[1].alias, event.data[2].playerID
+event.data.roomID : String for the room which this event happened
+event.data.isError : boolean indicating if there was an error
+
+event.type include:
+* createRoom -- The logged in player created a room
+* joinRoom -- The logged in player joined a room
+* leaveRoom -- The logged in player left the room
+* connectedRoom -- All the players that were invited have accepted and all the auto match making has been completed
+* peerAcceptedInvitation  -- The list of players who accepted an invitation to join a room
+* peerDeclinedInvitation -- The list of players who declined an invitation to join a room
+* peerLeftRoom  -- The list of players who left a room
+* peerDisconnectedFromRoom  -- The list of players who disconnected from a room
+
+Example "setRoomListener" request:
+
+    local function requestCallback(event)
+        print(event.data.roomID)
+    end
+
+    gameNetwork.request( "setRoomListener",
+    {
+        listener = requestCallback,
+    })
+
+**sendMessage:** Sends a String to another player
+Example "sendMessage" request:
+
+    gameNetwork.request( "sendMessage",
+    {
+        listener = requestCallback,
+        roomID = "o345t9348th", -- Id of the room the other player is in
+        playerIDs = -- array of players in the room to send the message to
+        {
+            "45987354897345345",
+            "32238975789573445",
+            "17891241248435990"
+        },
+        message = "String you want to send", -- The string you want to send to the other players
+        reliable = true, -- Optional parameter, default true, sends a reliable message or not, messages can be dropped if not reliable but it will reach the other players faster
+    })
+
+**setMessageReceivedListener:** Sets the listener that will be called when a message has been received
+Example "setMessageReceivedListener" request:
+
+    local function requestCallback(event)
+        print(event.data.message) -- This is the message that was send from the participant
+        print(event.data.participantID) -- This is the id of the participant who send the message
+    end
+
+    gameNetwork.request( "setMessageReceivedListener",
+    {
+        listener = requestCallback,
+    })
+    
+
+**setInvitationRecievedListener:** Sets the listener that will be called when an invitation has been received.
+Example "setInvitationRecievedListener" request:
+
+    local function requestCallback(event)
+        print(event.data.roomID) -- This is the room that the invitation was from
+        print(event.data.alias) -- This is the name of the person who send the invitation
+        print(event.data.playerID) -- This is the player id of the person who invited you
+    end
+
+    gameNetwork.request( "setInvitationRecievedListener",
+    {
+        listener = requestCallback,
+    })

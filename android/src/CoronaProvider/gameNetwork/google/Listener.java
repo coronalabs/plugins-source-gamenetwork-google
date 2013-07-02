@@ -16,6 +16,11 @@ import com.naef.jnlua.LuaState;
 import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 
 public abstract class Listener {
+	public final static String DATA = "data";
+	public final static String TYPE = "type";
+	public final static String PLAYER_ID = "playerID";
+	public final static String ALIAS = "alias";
+
 	protected CoronaRuntimeTaskDispatcher fDispatcher;
 	protected int fListener;
 

@@ -27,6 +27,9 @@ _[String][api.type.String]._ Supports the following strings:
 
 * `"leaderboards"`
 * `"achievements"`
+* `"selectPlayers"`
+* `"waitingRoom"`
+* `"invitations"`
 
 ## Examples
 
@@ -39,4 +42,48 @@ gameNetwork.show( "leaderboards" )
 -- Display the player's achievements.
 gameNetwork.show( "achievements" )
 
+
+local function selectPlayersListener(event)
+	print(event.data[1]) -- prints the selected players id
+	print(event.data.maxAutoMatchPlayers) -- prints the maximum number of auto match players
+	print(event.data.minAutoMatchPlayers) -- prints the minimum number of auto match players
+	print(event.data.phase) -- prints the phase, either "selected" or "cancelled"
+end
+
+-- Display the screen to select players for multiplayer
+gameNetwork.show("selectPlayers", 
+	{
+		listener = selectPlayersListener,
+		minPlayers = 1, -- This does NOT include the current player
+		maxPlayers = 3  -- This does NOT include the current player
+	})
+
+local function waitingRoomListener(event)
+	print(event.type) -- "waitingRoom"
+	print(event.data.isError)
+	print(event.data.phase) -- "start" when the game can start, "cancel" when the user exited the waiting room screen, this will leave the room automatically
+	print(event.data.roomId) -- The roomId of the waiting room
+	print(event.data[1]) -- The participantIds of the room
+end
+
+-- Display the waiting room screen for a specific room
+-- If the user exits the waiting room then the user will exit the room automatically
+gameNetwork.show("waitingRoom", 
+	{
+		listener = waitingRoomListener,
+		roomId = "3487324234",
+		minPlayers = 2, -- The minimum number of players before the game can start
+	})
+
+local function invitationListener(event)
+	print(event.data.roomId) -- The id of the room the player selected to accept the invitation to
+	print(event.data.phase) -- The phase, either "selected" or "cancelled"
+	print(event.data.isError)
+end
+
+-- Display the invitations management screen
+gameNetwork.show("invitations", 
+	{
+		listener = invitationListener
+	})
 `````

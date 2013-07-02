@@ -44,7 +44,7 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 				CoronaLua.newEvent(L, "setHighScore");
 
 				L.pushString("setHighScore");
-				L.setField(-2, "type");
+				L.setField(-2, TYPE);
 
 				L.newTable(4, 0);
 
@@ -59,9 +59,9 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 				L.setField(-2, "formattedValue");
 
 				L.pushString(finalScoreResult.getPlayerId());
-				L.setField(-2, "playerId");
+				L.setField(-2, PLAYER_ID);
 
-				L.setField(-2, "data");
+				L.setField(-2, DATA);
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);

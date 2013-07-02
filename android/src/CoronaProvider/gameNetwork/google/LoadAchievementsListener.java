@@ -43,7 +43,7 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 				CoronaLua.newEvent(L, "loadAchievements");
 
 				L.pushString("loadAchievements");
-				L.setField(-2, "type");
+				L.setField(-2, TYPE);
 				
 				L.newTable(buffer.getCount(), 0);
 
@@ -52,7 +52,7 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 					dumpOnTable(L, achievement, i+1);
 				}
 
-				L.setField(-2, "data");
+				L.setField(-2, DATA);
 
 				try {
 					CoronaLua.dispatchEvent(L, fListener, 0);
