@@ -17,7 +17,7 @@ Send or request information to/from the game network provider.
 
 ## Syntax
 
-	gameNetwork.request( command [, params ...] )
+    gameNetwork.request( command [, params ...] )
 
 ##### command ~^(required)^~
 _[String][api.type.String]._ The following commands are supported for the corresponding game networks:
@@ -58,11 +58,11 @@ event.data in callback listener is an arroy of items (tables) that have the foll
 
 Example "setHighScore" request:
 
-	gameNetwork.request( "setHighScore",
-	{
+    gameNetwork.request( "setHighScore",
+    {
         localPlayerScore = { category="Cy_sd893DEewf3", value=25 },
         listener = requestCallback
-	})
+    })
 
 'localPlayerScore' is a required table..
 
@@ -84,12 +84,12 @@ the following properties:
 * unixTime (integer)
 
 example:
-event.data[5].formattedValue	-- #event.data == 2nd value specified in range table
+event.data[5].formattedValue    -- #event.data == 2nd value specified in range table
 
 Example "loadScores" request:
 
-	gameNetwork.request( "loadScores",
-	{
+    gameNetwork.request( "loadScores",
+    {
         leaderboard =
         {
             category = "Cy_SLDWING4334h",
@@ -99,7 +99,7 @@ Example "loadScores" request:
             playerCentered = true,
         },
         listener = requestCallback
-	})
+    })
 
 'leaderboard' is a required table.
 
@@ -127,7 +127,7 @@ event.data.playerID
 
 Example "loadLocalPlayer" request:
 
-	gameNetwork.request( "loadLocalPlayer", { listener=requestCallback } )
+    gameNetwork.request( "loadLocalPlayer", { listener=requestCallback } )
 
 **loadPlayers:** Requests a list of players with the specified player IDs, and returns an array of items (tables) for each requested player in the callback listener.
 
@@ -142,8 +142,8 @@ event.data[3].alias
 
 Example "loadPlayers" request:
 
-	gameNetwork.request( "loadPlayers",
-	{
+    gameNetwork.request( "loadPlayers",
+    {
         playerIDs =
         {
             "45987354897345345",
@@ -151,7 +151,7 @@ Example "loadPlayers" request:
             "17891241248435990"
         },
         listener = requestCallback
-	})
+    })
 
 **loadFriends:** Requests a list of players the logged in player can invite to a game.
 
@@ -190,20 +190,20 @@ event.data[4].identifier
 
 Example "loadAchievements" request:
 
-	gameNetwork.request( "loadAchievements", { listener=requestCallback } )
+    gameNetwork.request( "loadAchievements", { listener=requestCallback } )
 
 **unlockAchievement:** Unlocks the specified achievement (identifier).
 
 Example "unlockAchievement" request.
 
-	gameNetwork.request( "unlockAchievement",
-	{
+    gameNetwork.request( "unlockAchievement",
+    {
         achievement =
         {
             identifier = "CY_w895w9w55w454",
         },
         listener=requestCallback
-	})
+    })
     
 In the "achievement" table:
 
@@ -227,7 +227,7 @@ descriptions of your achievements.
 
 Example "loadAchievementDescriptions" request:
 
-	gameNetwork.request( "loadAchievementDescriptions", { listener=requestCallback } )
+    gameNetwork.request( "loadAchievementDescriptions", { listener=requestCallback } )
 
 **loadLeaderboardCategories:** Requests a list of leaderboard categories for the app and returns an array of tables with each table containing description information of a leaderboard in the callback listener.
 
@@ -235,11 +235,11 @@ event.data in callback listener is an array of items (tables) where each table c
 
 Example "loadLeaderboardCategories" request:
 
-	gameNetwork.request( "loadLeaderboardCategories", { listener=requestCallback } )
+    gameNetwork.request( "loadLeaderboardCategories", { listener=requestCallback } )
  
-	-- example of what an event.data table returned via callback listener looks like
-	event.data =
-	{
+    -- example of what an event.data table returned via callback listener looks like
+    event.data =
+    {
         [1] = {
             category = "CY_a49t8h4t43t43t",
             title = "Easy"
@@ -252,7 +252,7 @@ Example "loadLeaderboardCategories" request:
             category = "CY_w4aERG4843EFEF",
             title = "Awesome"
         },
-	}
+    }
 
 **isConnected:** Checks to see if the user is currently logged into Google Play game services.  This function returns immediately with the result so there is no need to supply it with a callback.  Returns true if the current user is currently logged in and false if the user isn't.
 
@@ -319,12 +319,14 @@ Example "leaveRoom" request:
 
 **setRoomListener:** Sets the listener that will be called when an event for a room happens.  Setting this will override any listener set from createRoom, joinRoom, and leaveRoom.
 The event for  this listener is structured at follows
-event.type
-event.data : array which contains the list of players affected eg. event.data[1].alias, event.data[2].playerID
-event.data.roomID : String for the room which this event happened
-event.data.isError : boolean indicating if there was an error
+
+* event.type
+* event.data : array which contains the list of players affected eg. event.data[1].alias, event.data[2].playerID
+* event.data.roomID : String for the room which this event happened
+* event.data.isError : boolean indicating if there was an error
 
 event.type include:
+
 * createRoom -- The logged in player created a room
 * joinRoom -- The logged in player joined a room
 * leaveRoom -- The logged in player left the room
