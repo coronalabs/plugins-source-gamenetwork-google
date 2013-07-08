@@ -68,7 +68,7 @@ Example "setHighScore" request:
 
 In the localPlayerScore table:
 
-'category' must be a string that matches the ID of the leaderboard you want to register the score with as entered on iTunes Connect. (The ID you pick need not follow the fully qualified reverse domain style shown here.) '
+'category' must be a string that matches the ID of the leaderboard you want to register the score with as generated on Google's developers console.
 
 'value' must be a number representing your score.
 
@@ -115,7 +115,7 @@ In the leaderboard table:
 
 'playerCentered' (optional) is a boolean value.  If true this then value will return the scores that are centered around the currently logged in player.  If false then this will return the top scores.
 
-**loadLocalPlayer:** Requests the GKPlayer object for the currently logged-in user.
+**loadLocalPlayer:** Requests information for the currently logged-in user.
 
 event.data in callback listener includes the following properties:
 
