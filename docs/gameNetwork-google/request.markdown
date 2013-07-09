@@ -50,7 +50,7 @@ The following parameters are supported for the corresponding game networks:
 
 **setHighScore:** Sets a high score for the currently logged in user for the specified leaderboard (category). If the high score is not higher than the one currently on the server, the server will keep the highest value.
 
-event.data in callback listener is an arroy of items (tables) that have the following properties:
+event.data in callback listener is an array of items (tables) that have the following properties:
 * playerID (string)
 * category (string)
 * value (number)
