@@ -62,7 +62,7 @@ local function waitingRoomListener(event)
 	print(event.type) -- "waitingRoom"
 	print(event.data.isError)
 	print(event.data.phase) -- "start" when the game can start, "cancel" when the user exited the waiting room screen, this will leave the room automatically
-	print(event.data.roomId) -- The roomId of the waiting room
+	print(event.data.roomID) -- The roomId of the waiting room
 	print(event.data[1]) -- The participantIds of the room
 end
 
@@ -71,12 +71,12 @@ end
 gameNetwork.show("waitingRoom", 
 	{
 		listener = waitingRoomListener,
-		roomId = "3487324234",
+		roomID = "3487324234",
 		minPlayers = 2, -- The minimum number of players before the game can start
 	})
 
 local function invitationListener(event)
-	print(event.data.roomId) -- The id of the room the player selected to accept the invitation to
+	print(event.data.roomID) -- The id of the room the player selected to accept the invitation to
 	print(event.data.phase) -- The phase, either "selected" or "cancelled"
 	print(event.data.isError)
 end
