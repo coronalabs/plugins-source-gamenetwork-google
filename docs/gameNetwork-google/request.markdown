@@ -39,6 +39,7 @@ _[String][api.type.String]._ The following commands are supported for the corres
 * createRoom
 * joinRoom
 * leaveRoom
+* setRoomListener
 * sendMessage
 * setMessageReceivedListener
 * setInvitationRecievedListener
@@ -317,7 +318,8 @@ Example "leaveRoom" request:
         roomID = "o345t9348th" -- Id of the room you want to leave
     })
 
-**setRoomListener:** Sets the listener that will be called when an event for a room happens.  Setting this will override any listener set from createRoom, joinRoom, and leaveRoom.
+**setRoomListener:** Sets the listener that will be called when an event for a room happens.  Setting this will override any listener set from createRoom, joinRoom, and leaveRoom.  This callback can be called multiple times, for example if one player declines an invitaiton and then another person declines it after that.
+
 The event for  this listener is structured at follows
 
 * event.type
@@ -340,6 +342,7 @@ Example "setRoomListener" request:
 
     local function requestCallback(event)
         print(event.data.roomID)
+        -- print(event.data[1]) -- if there are players involved in this event this will be populated.
     end
 
     gameNetwork.request( "setRoomListener",
@@ -364,7 +367,7 @@ Example "sendMessage" request:
         reliable = true, -- Optional parameter, default true, sends a reliable message or not, messages can be dropped if not reliable but it will reach the other players faster
     })
 
-**setMessageReceivedListener:** Sets the listener that will be called when a message has been received
+**setMessageReceivedListener:** Sets the listener that will be called when a message has been received.  This will only receieve messages from the room the current player is connected to.
 Example "setMessageReceivedListener" request:
 
     local function requestCallback(event)
@@ -378,8 +381,8 @@ Example "setMessageReceivedListener" request:
     })
     
 
-**setInvitationRecievedListener:** Sets the listener that will be called when an invitation has been received.
-Example "setInvitationRecievedListener" request:
+**setInvitationReceivedListener:** Sets the listener that will be called when an invitation has been received.
+Example "setInvitationReceivedListener" request:
 
     local function requestCallback(event)
         print(event.data.roomID) -- This is the room that the invitation was from
@@ -387,7 +390,7 @@ Example "setInvitationRecievedListener" request:
         print(event.data.playerID) -- This is the player id of the person who invited you
     end
 
-    gameNetwork.request( "setInvitationRecievedListener",
+    gameNetwork.request( "setInvitationReceivedListener",
     {
         listener = requestCallback,
     })

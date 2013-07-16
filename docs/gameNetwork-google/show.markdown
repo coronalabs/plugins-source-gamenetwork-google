@@ -4,11 +4,10 @@
 > --------------------- ------------------------------------------------------------------------------------------
 > __Type__              [Function][api.type.Function]
 > __Library__           [gameNetwork.*][api.library.gameNetwork]
-> __Return value__      [TYPE][api.type.TYPE]
 > __Revision__          [REVISION_LABEL](REVISION_URL)
 > __Keywords__          gameNetwork, show, leaderboards, achievements
 > __Sample code__       
-> __See also__          [gameNetwork.init()][api.library.gameNetwork.init]<br/>[gameNetwork.request()][api.library.gameNetwork.request]
+> __See also__          [gameNetwork.init()][plugin.gameNetwork-google.init]<br/>[gameNetwork.request()][plugin.gameNetwork-google.request]
 > --------------------- ------------------------------------------------------------------------------------------
 
 
@@ -46,7 +45,7 @@ gameNetwork.show( "leaderboards" )
 
 `````
 
-**achievements:## View the achievements screen.  It shows the achievements that the player has and has not obtained yet.  This function does not take a callback
+**achievements:** View the achievements screen.  It shows the achievements that the player has and has not obtained yet.  This function does not take a callback
 
 Example "achievements" request:
 
