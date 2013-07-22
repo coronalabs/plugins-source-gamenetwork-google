@@ -558,6 +558,7 @@ public class LuaLoader implements JavaFunction {
 				}
 
 				roomConfig.setMessageReceivedListener(messageManager);
+				roomConfig.setRoomStatusUpdateListener(roomManager);
 				roomConfig.setSocketCommunicationEnabled(false);
 				helper.getGamesClient().createRoom(roomConfig.build());
 			}
@@ -580,6 +581,7 @@ public class LuaLoader implements JavaFunction {
 					roomConfig.setInvitationIdToAccept(roomId);
 					roomConfig.setSocketCommunicationEnabled(false);
 					roomConfig.setMessageReceivedListener(messageManager);
+					roomConfig.setRoomStatusUpdateListener(roomManager);
 					helper.getGamesClient().joinRoom(roomConfig.build());
 				}
 			}
