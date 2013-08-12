@@ -167,11 +167,10 @@ public class LuaLoader implements JavaFunction {
 		}
 
 		helper = new GameHelper(activity);
-		helper.setup(signInListener, GameHelper.CLIENT_GAMES | GameHelper.CLIENT_PLUS);
+		helper.setup(signInListener, GameHelper.CLIENT_GAMES);
 
 		if (!userInitiated) {
 			helper.getGamesClient().connect();
-			helper.getPlusClient().connect();
 			return 0;
 		}
 
@@ -197,10 +196,13 @@ public class LuaLoader implements JavaFunction {
 	}
 
 	public int logout(int _listener) {
-		if (helper != null) {
-			helper.signOut();
-		}
+		if (isConnected()) {
+			try {
+				helper.signOut();
+			} catch (java.lang.SecurityException ex) {
 
+			}
+		}
 		return 0;
 	}
 
@@ -345,20 +347,20 @@ public class LuaLoader implements JavaFunction {
 		requestedAction = L.toString(index);
 
 		if (requestedAction.equals("unlockAchievement")) {
-			String achievement = "";
+			String achievementId = "";
 			int top = L.getTop();
 			if (L.isTable(-1)) {
 				L.getField(-1, "achievement");
 				if (L.isTable(-1)) {
 					L.getField(-1, "identifier");
 					if (L.isString(-1)) {
-						achievement = L.toString(-1);
+						achievementId = L.toString(-1);
 					}
 				}
 			}
 			L.setTop(top);
-			if (isConnected()) {
-				helper.getGamesClient().unlockAchievementImmediate(new UnlockAchievementListener(fDispatcher, listener), achievement);
+			if (isConnected() && achievementId.equals("")) {
+				helper.getGamesClient().unlockAchievementImmediate(new UnlockAchievementListener(fDispatcher, listener), achievementId);
 			}
 			
 		} else if (requestedAction.equals("setHighScore")) {
@@ -379,7 +381,7 @@ public class LuaLoader implements JavaFunction {
 				}
 			}
 			L.setTop(top);
-			if (isConnected()) {
+			if (isConnected() && !leaderBoardId.equals("")) {
 				helper.getGamesClient().submitScoreImmediate(new SetHighScoreListener(fDispatcher, listener), leaderBoardId, score);
 			}
 			
@@ -665,7 +667,7 @@ public class LuaLoader implements JavaFunction {
 	}
 
 	private boolean isConnected() {
-		return helper != null && helper.getGamesClient().isConnected() && helper.getPlusClient().isConnected();
+		return helper != null && helper.getGamesClient().isConnected();
 	}
 
 	private class InitWrapper implements NamedJavaFunction {

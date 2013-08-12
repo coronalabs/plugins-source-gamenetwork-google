@@ -139,6 +139,16 @@ public class RoomManager implements RoomUpdateListener, RoomStatusUpdateListener
 	}
 
 	@Override
+	public void onP2PConnected(String participantid) {
+
+	}
+
+	@Override
+	public void onP2PDisconnected(String participantid) {
+		
+	}
+
+	@Override
 	public void onPeerDeclined(Room room, List<String> participantIds) {
 		pushToLua("peerDeclinedInvitation", room, participantIds, false);
 	}

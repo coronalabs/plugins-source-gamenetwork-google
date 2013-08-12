@@ -36,7 +36,6 @@ import com.google.android.gms.common.Scopes;
 import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.OnSignOutCompleteListener;
 import com.google.android.gms.games.multiplayer.Invitation;
-import com.google.android.gms.plus.PlusClient;
 
 public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             GooglePlayServicesClient.OnConnectionFailedListener,
@@ -72,14 +71,12 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
 
     // Client objects we manage. If a given client is not enabled, it is null.
     GamesClient mGamesClient = null;
-    PlusClient mPlusClient = null;
     
     private int mTries;
     // What clients we wrap (OR-able values, so we can use as flags too)
     public final static int CLIENT_NONE = 0x00;
     public final static int CLIENT_GAMES = 0x01;
-    public final static int CLIENT_PLUS = 0x02;
-    public final static int CLIENT_ALL = CLIENT_GAMES | CLIENT_PLUS;
+    public final static int CLIENT_ALL = CLIENT_GAMES;
     
     // What clients were requested? (bit flags)
     int mRequestedClients = CLIENT_NONE;
@@ -151,10 +148,8 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         Vector<String> scopesVector = new Vector<String>();
         if (0 != (clientsToUse & CLIENT_GAMES)) {
             scopesVector.add(Scopes.GAMES);
-        } else if (0 != (clientsToUse & CLIENT_PLUS)) {
-            scopesVector.add(Scopes.PLUS_LOGIN);
         }
-        
+
         mScopes = new String[scopesVector.size()];
         scopesVector.copyInto(mScopes);
         
@@ -180,13 +175,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
                 .setViewForPopups(aView)
                 .create();
         }
-        
-        if (0 != (clientsToUse & CLIENT_PLUS)) {
-            debugLog("onCreate: creating GamesPlusClient");
-            mPlusClient = new PlusClient.Builder(mContext, this, this)
-                    .setScopes(mScopes)
-                    .build();
-        }
     }
     
     public GamesClient getGamesClient() {
@@ -196,13 +184,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         return mGamesClient;
     }
 
-    public PlusClient getPlusClient() {
-        if (mPlusClient == null) {
-            throw new IllegalStateException("No PlusClient. Did you request it at setup?"); 
-        }
-        return mPlusClient;
-    }
-    
     public boolean isSignedIn() {
         return mSignedIn;
     }
@@ -226,10 +207,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
                 debugLog("Connecting GamesClient.");
                 mClientCurrentlyConnecting = CLIENT_GAMES;
             }
-            else if (mPlusClient != null && (0 != (pendingClients & CLIENT_PLUS))) {
-                debugLog("Connecting PlusClient.");
-                mClientCurrentlyConnecting = CLIENT_PLUS;
-            }
             else {
                 throw new AssertionError("Not all clients connected, yet no one is next. R="  
                         + mRequestedClients + ", C="  + mConnectedClients);
@@ -250,9 +227,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             case CLIENT_GAMES:
                 mGamesClient.connect();
                 break;
-            case CLIENT_PLUS:
-                mPlusClient.connect();
-                break;
         }
     }
     
@@ -261,11 +235,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
                 && mGamesClient.isConnected()) {
             mConnectedClients &= ~CLIENT_GAMES;
             mGamesClient.disconnect();
-        }
-        if ((whatClients & CLIENT_PLUS) != 0 && mPlusClient != null
-                && mPlusClient.isConnected()) {
-            mConnectedClients &= ~CLIENT_PLUS;
-            mPlusClient.disconnect();
         }
     }
     
@@ -572,9 +541,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         mAutoSignIn = false;
         mSignedIn = false;
         
-        if (mPlusClient != null && mPlusClient.isConnected()) {
-            mPlusClient.clearDefaultAccount();
-        }
         if (mGamesClient != null && mGamesClient.isConnected()) {
             mGamesClient.signOut(this);
         }
@@ -596,11 +562,8 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     public String getScopes() {
         StringBuilder scopeStringBuilder = new StringBuilder();
         int clientsToUse = mRequestedClients;
-        // GAMES implies PLUS_LOGIN
         if (0 != (clientsToUse & CLIENT_GAMES)) {
             addToScope(scopeStringBuilder, Scopes.GAMES);
-        } else if (0 != (clientsToUse & CLIENT_PLUS)) {
-            addToScope(scopeStringBuilder, Scopes.PLUS_LOGIN);
         }
         return scopeStringBuilder.toString();
     }
