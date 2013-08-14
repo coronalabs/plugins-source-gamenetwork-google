@@ -359,7 +359,7 @@ public class LuaLoader implements JavaFunction {
 				}
 			}
 			L.setTop(top);
-			if (isConnected() && achievementId.equals("")) {
+			if (isConnected() && !achievementId.equals("")) {
 				helper.getGamesClient().unlockAchievementImmediate(new UnlockAchievementListener(fDispatcher, listener), achievementId);
 			}
 			
