@@ -26,11 +26,14 @@ import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 import com.ansca.corona.CoronaRuntimeTask;
 
 import com.google.android.gms.games.GamesClient;
-
+import com.google.android.gms.games.GamesActivityResultCodes;
 
 public class SelectPlayersResultHandler extends Listener implements CoronaActivity.OnActivityResultHandler {
-	public SelectPlayersResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener) {
+	private GameHelper fGameHelper;
+
+	public SelectPlayersResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GameHelper _gameHelper) {
 		super(_dispatcher, _listener);
+		fGameHelper = _gameHelper;
 	}
 
 	@Override
@@ -46,7 +49,12 @@ public class SelectPlayersResultHandler extends Listener implements CoronaActivi
 			minAutoMatchPlayers = data.getIntExtra(GamesClient.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
         	maxAutoMatchPlayers = data.getIntExtra(GamesClient.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
         	phase = "selected";
-		} else { //Cancelled
+        } else if (GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED == resultCode) {
+        	phase = "logout";
+        	if (fGameHelper != null && fGameHelper.getGamesClient() != null) {
+				fGameHelper.signOut();
+			}
+        } else { //Cancelled
 			invitees = new ArrayList<String>();
 			phase = "cancelled";
 		}

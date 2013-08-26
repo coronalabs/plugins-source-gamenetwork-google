@@ -34,12 +34,10 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.games.GamesClient;
-import com.google.android.gms.games.OnSignOutCompleteListener;
 import com.google.android.gms.games.multiplayer.Invitation;
 
 public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
-            GooglePlayServicesClient.OnConnectionFailedListener,
-            OnSignOutCompleteListener {
+            GooglePlayServicesClient.OnConnectionFailedListener {
     
     public interface GameHelperListener {
         /** 
@@ -55,10 +53,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         void onSignInSucceeded();
     }
     
-    // Activity we are bound to. We need to keep a reference to the Activity because
-    // some games methods require an Activity. A Context won't do. We don't leak that because,
-    // if our onStop() method is called from the Activity's onStop(), then we will let go
-    // of the Activity reference there.
     Activity mActivity = null;
     Context mContext = null;
     String mScopes[];
@@ -178,16 +172,9 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     }
     
     public GamesClient getGamesClient() {
-        if (mGamesClient == null) {
-            throw new IllegalStateException("No GamesClient. Did you request it at setup?"); 
-        }
         return mGamesClient;
     }
 
-    public boolean isSignedIn() {
-        return mSignedIn;
-    }
-    
     void startConnections() {
         mConnectedClients = CLIENT_NONE;
         connectNextClient();
@@ -227,14 +214,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             case CLIENT_GAMES:
                 mGamesClient.connect();
                 break;
-        }
-    }
-    
-    void killConnections(int whatClients) {
-        if ((whatClients & CLIENT_GAMES) != 0 && mGamesClient != null 
-                && mGamesClient.isConnected()) {
-            mConnectedClients &= ~CLIENT_GAMES;
-            mGamesClient.disconnect();
         }
     }
     
@@ -427,24 +406,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         mContext = act;
     }
 
-    /** Call this method from your Activity's onStop(). */
-    public void onStop() {
-        debugLog("onStop: disconnecting clients.");
-
-        // disconnect the clients -- this is very important (prevents resource leaks!)
-        killConnections(CLIENT_ALL);
-
-        // no longer signed in
-        mSignedIn = false;
-        
-        // destroy progress dialog -- we create it again when needed
-        mProgressDialog = null;
-        
-        // let go of the Activity and Context references
-        mActivity = null;
-        mContext = null;
-    }
-
     /** Returns an error dialog that's appropriate for the given error code. */
     Dialog getErrorDialog(int errorCode) {
         if (GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
@@ -541,20 +502,17 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         mAutoSignIn = false;
         mSignedIn = false;
         
-        if (mGamesClient != null && mGamesClient.isConnected()) {
-            mGamesClient.signOut(this);
+        if (mGamesClient != null) {
+            try {
+                mGamesClient.signOut();
+            } catch (java.lang.SecurityException ex) {
+
+            }
+            mGamesClient.disconnect();
+            mGamesClient = null;
         }
-        
-        // kill connects to all clients but games, which must remain
-        // connected til we get onSignOutComplete()
-        killConnections(CLIENT_ALL & ~CLIENT_GAMES);
     }
 
-    @Override
-    public void onSignOutComplete() {
-        if (mGamesClient.isConnected()) mGamesClient.disconnect();
-    }
-    
     /**
      * Returns the current requested scopes.  This is not valid until setup() has been called.
      * @return the requested scopes, including the oauth2: prefix

@@ -28,11 +28,11 @@ import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 
 public class WaitingRoomResultHandler extends Listener implements CoronaActivity.OnActivityResultHandler {
-	private GamesClient fGamesClient;
+	private GameHelper fGameHelper;
 
-	public WaitingRoomResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GamesClient _gamesClient) {
+	public WaitingRoomResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GameHelper _gameHelper) {
 		super(_dispatcher, _listener);
-		fGamesClient = _gamesClient;
+		fGameHelper = _gameHelper;
 	}
 
 	@Override
@@ -44,7 +44,13 @@ public class WaitingRoomResultHandler extends Listener implements CoronaActivity
 			pushIntentResult(false, "start", room);
 		} else if (Activity.RESULT_CANCELED == resultCode || GamesActivityResultCodes.RESULT_LEFT_ROOM == resultCode){ //Cancelled
 			pushIntentResult(true, "cancel", room);
-			fGamesClient.leaveRoom(RoomManager.getRoomManager(fDispatcher, fListener, fGamesClient), room.getRoomId());
+			if (fGameHelper != null && fGameHelper.getGamesClient() != null) {
+				fGameHelper.getGamesClient().leaveRoom(RoomManager.getRoomManager(fDispatcher, fListener, fGameHelper.getGamesClient()), room.getRoomId());
+			}
+		} else if (GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED == resultCode) {
+			if (fGameHelper != null && fGameHelper.getGamesClient() != null) {
+				fGameHelper.signOut();
+			}
 		}
 	}
 
@@ -53,7 +59,7 @@ public class WaitingRoomResultHandler extends Listener implements CoronaActivity
 			return;
 		}
 
-		final GamesClient finalGamesClient = fGamesClient;
+		final GamesClient finalGamesClient = fGameHelper.getGamesClient();
 
 		CoronaRuntimeTask task = new CoronaRuntimeTask() {
 			@Override

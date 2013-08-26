@@ -30,8 +30,11 @@ import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 
 public class InvitationResultHandler extends Listener implements CoronaActivity.OnActivityResultHandler {
-	public InvitationResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener) {
+	private GameHelper fGameHelper;
+
+	public InvitationResultHandler(CoronaRuntimeTaskDispatcher _dispatcher, int _listener, GameHelper _gameHelper) {
 		super(_dispatcher, _listener);
+		fGameHelper = _gameHelper;
 	}
 
 	@Override
@@ -42,6 +45,11 @@ public class InvitationResultHandler extends Listener implements CoronaActivity.
 		if (Activity.RESULT_OK == resultCode) { //return the room id that the user chose to join
 			Invitation inv = data.getExtras().getParcelable(GamesClient.EXTRA_INVITATION);
 			pushInvitationsToLua(inv.getInvitationId(), false, "selected");
+		} else if(GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED == resultCode) {
+			if (fGameHelper != null && fGameHelper.getGamesClient() != null) {
+				fGameHelper.signOut();
+			}
+			pushInvitationsToLua("", true, "logout");
 		} else {
 			pushInvitationsToLua("", true, "cancelled");
 		}

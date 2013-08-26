@@ -33,6 +33,7 @@ import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.games.GamesActivityResultCodes;
 
 public class LuaLoader implements JavaFunction {
 
@@ -195,13 +196,14 @@ public class LuaLoader implements JavaFunction {
 		return 0;
 	}
 
-	public int logout(int _listener) {
+	public int logout() {
 		if (isConnected()) {
 			try {
 				helper.signOut();
 			} catch (java.lang.SecurityException ex) {
 
 			}
+			helper = null;
 		}
 		return 0;
 	}
@@ -227,25 +229,45 @@ public class LuaLoader implements JavaFunction {
 		whatToShow = L.toString(index);
 		CoronaActivity activity = CoronaEnvironment.getCoronaActivity();
 
-		boolean checks = isConnected() && activity != null;
-
 		if (isConnected() && activity != null) {
 			final GameHelper finalHelper = helper;
 			if (whatToShow.equals("achievements")) {
+
+				final int requestCode = activity.registerActivityResultHandler(new CoronaActivity.OnActivityResultHandler() {
+					@Override
+					public void onHandleActivityResult(CoronaActivity activity, int requestCode, int resultCode, android.content.Intent data) {
+						activity.unregisterActivityResultHandler(this);
+						if (GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED == resultCode) {
+							logout();
+						}
+					}
+				});
+
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						if (CoronaEnvironment.getCoronaActivity() != null) {
-							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAchievementsIntent(), 123);
+							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAchievementsIntent(), requestCode);
 						}
 					}
 				});
 			} else if (whatToShow.equals("leaderboards")) {
+
+				final int requestCode = activity.registerActivityResultHandler(new CoronaActivity.OnActivityResultHandler() {
+					@Override
+					public void onHandleActivityResult(CoronaActivity activity, int requestCode, int resultCode, android.content.Intent data) {
+						activity.unregisterActivityResultHandler(this);
+						if (GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED == resultCode) {
+							logout();
+						}
+					}
+				});
+
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						if (CoronaEnvironment.getCoronaActivity() != null) {
-							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAllLeaderboardsIntent(), 123);
+							CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getAllLeaderboardsIntent(), requestCode);
 						}
 						
 					}
@@ -269,7 +291,7 @@ public class LuaLoader implements JavaFunction {
 				}
 
 				if (min > -1 && max > -1) {
-					final int finalRequestCode = activity.registerActivityResultHandler(new SelectPlayersResultHandler(fDispatcher, listener));
+					final int finalRequestCode = activity.registerActivityResultHandler(new SelectPlayersResultHandler(fDispatcher, listener, finalHelper));
 					final int finalMin = min;
 					final int finalMax = max;
 					activity.runOnUiThread(new Runnable() {
@@ -299,7 +321,7 @@ public class LuaLoader implements JavaFunction {
 				}
 
 				if (roomId != null) {
-					final int finalRequestCode = activity.registerActivityResultHandler(new WaitingRoomResultHandler(fDispatcher, listener, finalHelper.getGamesClient()));
+					final int finalRequestCode = activity.registerActivityResultHandler(new WaitingRoomResultHandler(fDispatcher, listener, finalHelper));
 					final Room room = RoomManager.getRoom(roomId);
 					final int finalMinToStart = minToStart;
 					activity.runOnUiThread(new Runnable() {
@@ -313,7 +335,7 @@ public class LuaLoader implements JavaFunction {
 				}
 
 			} else if (whatToShow.equals("invitations")) {
-				final int finalRequestCode = activity.registerActivityResultHandler(new InvitationResultHandler(fDispatcher, listener));
+				final int finalRequestCode = activity.registerActivityResultHandler(new InvitationResultHandler(fDispatcher, listener, finalHelper));
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -398,7 +420,7 @@ public class LuaLoader implements JavaFunction {
 			}
 			login(listener, userInitiated);
 		} else if (requestedAction.equals("logout")) {
-			logout(listener);
+			logout();
 		} else if (requestedAction.equals("loadPlayers")) {
 			HashSet<String> nameSet = new HashSet<String>();
 			
@@ -667,7 +689,7 @@ public class LuaLoader implements JavaFunction {
 	}
 
 	private boolean isConnected() {
-		return helper != null && helper.getGamesClient().isConnected();
+		return helper != null && helper.getGamesClient() != null && helper.getGamesClient().isConnected();
 	}
 
 	private class InitWrapper implements NamedJavaFunction {
