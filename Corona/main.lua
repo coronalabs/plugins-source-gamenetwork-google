@@ -28,14 +28,18 @@ scoreTextField.inputType = "number"
 
 -- Submits the score from the scoreTextField into the leaderboard
 local function submitScoreListener(event)
-	gameNetwork.request("setHighScore", 
-		{
-			localPlayerScore = 
-			{
-				category = leaderboardId, -- Id of the leaderboard to submit the score into
-				value = scoreTextField.text -- The score to submit
-			}
-		})
+	-- gameNetwork.request("setHighScore", 
+	-- 	{
+	-- 		localPlayerScore = 
+	-- 		{
+	-- 			category = leaderboardId, -- Id of the leaderboard to submit the score into
+	-- 			value = scoreTextField.text -- The score to submit
+	-- 		}
+	-- 	})
+	local function getFriendsList(event1)
+		print(#event1.data)
+	end
+	gameNetwork.request("loadFriends", { listener = getFriendsList })
 end
 
 local function unlockAchievementListener(event)

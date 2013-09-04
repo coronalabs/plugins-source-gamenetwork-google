@@ -60,7 +60,7 @@
 		          android:configChanges="keyboardHidden|screenSize|orientation" />
 		
 		<!-- Corona content provider required by the video player and mail app to access this app's local files. -->
-		<provider android:name="com.ansca.corona.FileContentProvider"
+		<provider android:name="com.ansca.corona.storage.FileContentProvider"
 		          android:authorities="com.coronalabs.test.mathmania.files" />
 		
 		<!-- Corona service used to perform background operations such as managing notifications. -->
