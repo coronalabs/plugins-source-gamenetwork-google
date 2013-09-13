@@ -95,13 +95,7 @@ public class LoadInvitablePlayersManager {
 					while (iter.hasNext()) {
 						player = iter.next();
 
-						L.newTable(0, 2);
-						
-						L.pushString(player.getPlayerId());
-						L.setField(-2, Listener.PLAYER_ID);
-
-						L.pushString(player.getDisplayName());
-						L.setField(-2, Listener.ALIAS);
+						Listener.pushPlayerToLua(L, player);
 
 						L.rawSet(-2, count);
 						count++;

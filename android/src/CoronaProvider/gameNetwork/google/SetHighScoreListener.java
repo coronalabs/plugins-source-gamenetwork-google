@@ -21,7 +21,6 @@ import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 import com.ansca.corona.CoronaRuntimeTask;
 
 import com.google.android.gms.games.leaderboard.OnScoreSubmittedListener;
-import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.SubmitScoreResult;
 
 public class SetHighScoreListener extends Listener implements OnScoreSubmittedListener{
@@ -48,19 +47,7 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 
 				L.newTable(4, 0);
 
-				L.pushString(finalScoreResult.getLeaderboardId());
-				L.setField(-2, "category");
-
-				SubmitScoreResult.Result result = finalScoreResult.getScoreResult(LeaderboardVariant.TIME_SPAN_ALL_TIME);
-				L.pushNumber((double)result.rawScore);
-				L.setField(-2, "value");
-
-				L.pushString(result.formattedScore);
-				L.setField(-2, "formattedValue");
-
-				L.pushString(finalScoreResult.getPlayerId());
-				L.setField(-2, PLAYER_ID);
-
+				Listener.pushSubmitScoreResultToLua(L, finalScoreResult);
 				L.setField(-2, DATA);
 
 				try {

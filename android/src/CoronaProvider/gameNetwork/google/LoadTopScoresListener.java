@@ -57,7 +57,8 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 
 				for(int i = 0; i<scores.getCount(); i++) {
 					leaderBoardScore = scores.get(i);
-					dumpOnTable(L, leaderBoardScore, i+1);
+					Listener.pushLeaderboardScoreToLua(L, leaderBoardScore, fCategory);
+					L.rawSet(-2, i+1);
 				}
 
 				L.setField(-2, DATA);
@@ -68,35 +69,6 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 				} catch(Exception ex) {
 					ex.printStackTrace();
 				}
-			}
-
-			private void dumpOnTable(LuaState L, LeaderboardScore score, int index) {
-				Player player = score.getScoreHolder();
-				L.newTable(0, 7);
-
-				L.pushString(player.getPlayerId());
-				L.setField(-2, PLAYER_ID);
-
-				L.pushString(fCategory);
-				L.setField(-2, "category");
-
-				L.pushNumber((double)score.getRawScore());
-				L.setField(-2, "value");					
-
-				Date date = new Date(score.getTimestampMillis());
-				L.pushString(date.toString());
-				L.setField(-2, "date");
-
-				L.pushString(score.getDisplayScore());
-				L.setField(-2, "formattedValue");
-
-				L.pushNumber((double)score.getRank());
-				L.setField(-2, "rank");
-
-				L.pushNumber(score.getTimestampMillis());
-				L.setField(-2, "unixTime");
-
-				L.rawSet(-2, index);
 			}
 		};
 		fDispatcher.send(task);

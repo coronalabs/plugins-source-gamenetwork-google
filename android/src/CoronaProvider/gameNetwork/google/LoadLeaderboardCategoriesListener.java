@@ -50,7 +50,8 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 
 					for(int i = 0; i<buffer.getCount(); i++) {
 						leaderboard = buffer.get(i);
-						dumpOnTable(L, leaderboard, i+1);
+						Listener.pushLeaderboardToLua(L, leaderboard);
+						L.rawSet(-2, i+1);
 					}
 
 					L.setField(-2, DATA);
@@ -60,18 +61,6 @@ public class LoadLeaderboardCategoriesListener extends Listener implements OnLea
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-			}
-
-			private void dumpOnTable(LuaState L, Leaderboard leaderboard, int index) {
-				L.newTable(0, 2);
-
-				L.pushString(leaderboard.getLeaderboardId());
-				L.setField(-2, "category");
-
-				L.pushString(leaderboard.getDisplayName());
-				L.setField(-2, "title");
-
-				L.rawSet(-2, index);
 			}
 		};
 

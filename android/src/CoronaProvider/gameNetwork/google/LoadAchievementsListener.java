@@ -49,7 +49,8 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 
 				for(int i = 0; i<buffer.getCount(); i++) {
 					achievement = buffer.get(i);
-					dumpOnTable(L, achievement, i+1);
+					Listener.pushAchievementToLua(L, achievement);
+					L.rawSet(-2, i+1);
 				}
 
 				L.setField(-2, DATA);
@@ -61,30 +62,6 @@ public class LoadAchievementsListener extends Listener implements OnAchievements
 					ex.printStackTrace();
 				}
 				
-			}
-
-			private void dumpOnTable(LuaState L, Achievement achievement, int index) {
-				L.newTable(0, 6);
-
-				L.pushString(achievement.getAchievementId());
-				L.setField(-2, "identifier");
-
-				L.pushString(achievement.getName());
-				L.setField(-2, "title");
-
-				L.pushString(achievement.getDescription());
-				L.setField(-2, "description");					
-
-				L.pushBoolean(achievement.getState() == Achievement.STATE_UNLOCKED);
-				L.setField(-2, "isCompleted");
-
-				L.pushBoolean(achievement.getState() == Achievement.STATE_HIDDEN);
-				L.setField(-2, "isHidden");
-
-				L.pushNumber(achievement.getLastUpdatedTimestamp());
-				L.setField(-2, "lastReportedDate");
-
-				L.rawSet(-2, index);
 			}
 		};
 		fDispatcher.send(task);

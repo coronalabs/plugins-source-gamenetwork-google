@@ -45,14 +45,7 @@ public class InvitationReceivedListener extends Listener implements OnInvitation
 				
 				L.newTable();
 
-				L.pushString(finalInvitation.getInvitationId());
-				L.setField(-2, RoomManager.ROOM_ID);
-
-				L.pushString(finalInvitation.getInviter().getDisplayName());
-				L.setField(-2, ALIAS);
-
-				L.pushString(finalInvitation.getInviter().getPlayer().getPlayerId());
-				L.setField(-2, PLAYER_ID);
+				Listener.pushInvitationToLua(L, finalInvitation);
 
 				L.setField(-2, DATA);
 
