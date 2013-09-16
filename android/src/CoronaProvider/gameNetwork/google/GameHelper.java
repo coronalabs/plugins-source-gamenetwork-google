@@ -66,7 +66,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     // Client objects we manage. If a given client is not enabled, it is null.
     GamesClient mGamesClient = null;
     
-    private int mTries;
     // What clients we wrap (OR-able values, so we can use as flags too)
     public final static int CLIENT_NONE = 0x00;
     public final static int CLIENT_GAMES = 0x01;
@@ -119,7 +118,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
     public GameHelper(Activity activity) {
         mActivity = activity;
         mContext = activity;
-        mTries = 0;
     }
 
     public void setup(GameHelperListener listener) {
@@ -317,7 +315,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             errorDialog = makeSignInErrorDialog(SIGN_IN_ERROR_MESSAGE);
         }
 
-        mTries = 0;
         mAutoSignIn = false;
         errorDialog.show();
         if (mListener != null) mListener.onSignInFailed();
@@ -337,19 +334,13 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
             if (responseCode == Activity.RESULT_OK) {
                 // Ready to try to connect again.
                 debugLog("responseCode == RESULT_OK. So connecting.");
-                mTries = 0;
                 connectCurrentClient();
             }
             else {
                 // Whatever the problem we were trying to solve, it was not solved.
                 // So give up and show an error message.
-                if(mTries < 1) {
-                    beginUserInitiatedSignIn();
-                    mTries++;
-                } else {
-                    debugLog("responseCode != RESULT_OK, so not reconnecting.");
-                    giveUp();
-                }                
+                debugLog("responseCode != RESULT_OK, so not reconnecting.");
+                giveUp();
             }
         }
     }
