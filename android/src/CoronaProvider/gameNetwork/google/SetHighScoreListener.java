@@ -45,8 +45,6 @@ public class SetHighScoreListener extends Listener implements OnScoreSubmittedLi
 				L.pushString("setHighScore");
 				L.setField(-2, TYPE);
 
-				L.newTable(4, 0);
-
 				Listener.pushSubmitScoreResultToLua(L, finalScoreResult);
 				L.setField(-2, DATA);
 

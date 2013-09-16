@@ -43,8 +43,6 @@ public class InvitationReceivedListener extends Listener implements OnInvitation
 				L.pushString("invitationReceived");
 				L.setField(-2, TYPE);
 				
-				L.newTable();
-
 				Listener.pushInvitationToLua(L, finalInvitation);
 
 				L.setField(-2, DATA);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.coronalabs.test.mathmania"
+          package="com.coronalabs.dchan"
           android:versionCode="2"
           android:versionName="2.0"
 	      android:installLocation="auto">
@@ -33,7 +33,7 @@
 	             android:icon="@drawable/icon">
 		<meta-data android:name="targetedAppStore" android:value="google"/>
 		<meta-data android:name="com.google.android.gms.games.APP_ID"
-            android:value="\ 989030404439" />
+            android:value="\ 528370535140" />
 		<!-- The main Corona activity that runs the Corona project. -->
 		<activity android:name="com.ansca.corona.CoronaActivity"
 		          android:screenOrientation="portrait"
@@ -61,7 +61,7 @@
 		
 		<!-- Corona content provider required by the video player and mail app to access this app's local files. -->
 		<provider android:name="com.ansca.corona.storage.FileContentProvider"
-		          android:authorities="com.coronalabs.test.mathmania.files" />
+		          android:authorities="com.coronalabs.dchan.files" />
 		
 		<!-- Corona service used to perform background operations such as managing notifications. -->
 		<service android:name="com.ansca.corona.CoronaService" />
@@ -88,7 +88,7 @@
 			<intent-filter>
 				<action android:name="com.google.android.c2dm.intent.RECEIVE" />
 				<action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-				<category android:name="com.coronalabs.test.mathmania" />
+				<category android:name="com.coronalabs.dchan" />
 			</intent-filter>
 		</receiver>
 
