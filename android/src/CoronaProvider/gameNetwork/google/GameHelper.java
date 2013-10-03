@@ -304,19 +304,7 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         debugLog("giveUp: giving up on connection. " +
                 ((mConnectionResult == null) ? "(no connection result)" :
                     ("Status code: "  + mConnectionResult.getErrorCode())));
-
-        Dialog errorDialog = null;
-        if (mConnectionResult != null) {
-            // get error dialog for that specific problem
-            errorDialog = getErrorDialog(mConnectionResult.getErrorCode());
-        }
-        else {
-            // make a default error dialog
-            errorDialog = makeSignInErrorDialog(SIGN_IN_ERROR_MESSAGE);
-        }
-
         mAutoSignIn = false;
-        // errorDialog.show();
         if (mListener != null) mListener.onSignInFailed();
     }
 
@@ -360,11 +348,10 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
         debugLog("isGooglePlayServicesAvailable returned " + result);
         if (result != ConnectionResult.SUCCESS) {
-            // Nope.
             debugLog("Google Play services not available. Show error dialog.");
-            Dialog errorDialog = getErrorDialog(result);
-            if (mListener != null) mListener.onSignInFailed();
-            errorDialog.show();
+            if (mListener != null) {
+                mListener.onSignInFailed();
+            }
             return;
         }
 
@@ -397,80 +384,6 @@ public class GameHelper implements GooglePlayServicesClient.ConnectionCallbacks,
         mContext = act;
     }
 
-    /** Returns an error dialog that's appropriate for the given error code. */
-    Dialog getErrorDialog(int errorCode) {
-        if (GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
-            // try to get a standard Google Play Services error dialog
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
-                mConnectionResult.getErrorCode(), mActivity, RC_UNUSED, null);
-            if (errorDialog != null) return errorDialog;
-        }
-
-        // No standard dialog is available, so construct our own dialog.
-        String userMessage, logMessage;
-
-        switch (errorCode) {
-            case ConnectionResult.DEVELOPER_ERROR:
-                userMessage = "Application configuration problem.";
-                logMessage = "DEVELOPER_ERROR: Check package name, signing certificate, app ID.";
-                break;
-            case ConnectionResult.INTERNAL_ERROR:
-                userMessage = "Internal error. Please try again later.";
-                logMessage = "INTERNAL_ERROR";
-                break;
-            case ConnectionResult.INVALID_ACCOUNT:
-                userMessage = "Invalid account. Try using a different account.";
-                logMessage = "INVALID_ACCOUNT";
-                break;
-            case ConnectionResult.LICENSE_CHECK_FAILED:
-                userMessage = "Cannot verify application license.";
-                logMessage = "LICENSE_CHECK_FAILED: app license could not be verified.";
-                break;
-            case ConnectionResult.NETWORK_ERROR:
-                userMessage = "There was a network problem while connecting. Please check that you are online and try again later.";
-                logMessage = "NETWORK_ERROR: check connection, try again.";
-                break;
-            case ConnectionResult.RESOLUTION_REQUIRED:
-                // this should not normally happen, since we would have resolved it.
-                userMessage = "There was a sign-in issue that could not be resolved.";
-                logMessage = "RESOLUTION_REQUIRED: Result resolution is required, but was not performed.";
-                break;
-            case ConnectionResult.SERVICE_DISABLED:
-                userMessage = "Cannot sign-in. Verify that Google Play services are enabled and try again.";
-                logMessage = "SERVICE_DISABLED: Google Play services may have been manually disabled.";
-                break;
-            case ConnectionResult.SERVICE_INVALID:
-                userMessage = "Cannot sign-in. Verify that Google Play services are correctly set up and try again.";
-                logMessage = "SERVICE_INVALID. Google Play services may need to be reinstalled on device.";
-                break;
-            case ConnectionResult.SERVICE_MISSING:
-                userMessage = "Cannot sign-in. Verify that Google Play services are correctly installed and try again.";
-                logMessage = "SERVICE_MISSING. Google Play services may not be installed on the device.";
-                break;
-            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                userMessage = "A newer version of Google Play services is required. Please update and try again.";
-                logMessage = "SERVICE_VERSION_UPDATE_REQUIRED. Must install newer version of Google Play services.";
-                break;
-            case ConnectionResult.SIGN_IN_REQUIRED:
-                // should not happen -- normally resolvable
-                userMessage = "There was an issue with sign-in.";
-                logMessage = "SIGN_IN_REQUIRED";
-                break;
-            case ConnectionResult.SUCCESS:
-                // this should DEFINITELY not happen
-                userMessage = "Sign-in successful.";
-                logMessage = "SUCCESS";
-                break;
-            default:
-                userMessage = "An unexpected error occurred during sign-in. Try again later.";
-                logMessage = "Unexpected error: " + mConnectionResult.getErrorCode();
-        }
-
-        debugLog("ERROR CODE " + errorCode + ": message=" + userMessage + "; details=" + logMessage);
-        return makeSignInErrorDialog(userMessage);
-    }
-
-    
     Dialog makeSignInErrorDialog(String message) {
         return (new AlertDialog.Builder(mContext)).setTitle("Sign-in error")
                 .setMessage(message)
