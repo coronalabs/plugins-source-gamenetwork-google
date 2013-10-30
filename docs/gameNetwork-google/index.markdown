@@ -7,7 +7,7 @@
 > __Keywords__          gameNetwork, game center, game services
 > __Sample code__       
 > __See also__          
-> __Availability__      Starter, Pro, Enterprise
+> __Availability__      Starter, Basic, Pro, Enterprise
 > --------------------- ------------------------------------------------------------------------------------------
 
 ## Overview
@@ -15,6 +15,12 @@
 Corona's game network API allows access to social gaming features such as public leaderboards and achievements.
 
 **NOTE:** Using the gameNetwork API will enable Corona Launchpad regardless of the setting in config.lua.
+
+## Platforms
+
+The following platforms are supported:
+
+* Android
 
 #### Google Play game services
 
