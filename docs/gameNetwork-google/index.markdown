@@ -52,6 +52,7 @@ settings =
 		{
 			-- required
 			publisherId = "com.coronalabs",
+			supportedPlatforms = { android = true }
 		},
 	},
 }
