@@ -22,9 +22,9 @@ import com.ansca.corona.CoronaRuntime;
 import com.ansca.corona.CoronaRuntimeTaskDispatcher;
 import com.ansca.corona.CoronaRuntimeTask;
 
+import com.google.android.gms.games.leaderboard.Leaderboard;
 import com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener;
 import com.google.android.gms.games.leaderboard.LeaderboardScore;
-import com.google.android.gms.games.leaderboard.LeaderboardBuffer;
 import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
 import com.google.android.gms.games.Player;
 
@@ -36,12 +36,11 @@ public class LoadTopScoresListener extends Listener implements OnLeaderboardScor
 		fCategory = _category;
 	}
 
-	public void onLeaderboardScoresLoaded(int statusCode, LeaderboardBuffer _leaderboard, LeaderboardScoreBuffer _scores) {
+	public void onLeaderboardScoresLoaded(int statusCode, Leaderboard _leaderboard, LeaderboardScoreBuffer _scores) {
 		if (fListener < 0) {
 			return;
 		}
 
-		final LeaderboardBuffer leaderboards = _leaderboard;
 		final LeaderboardScoreBuffer scores = _scores;
 		CoronaRuntimeTask task = new CoronaRuntimeTask() {
 			@Override

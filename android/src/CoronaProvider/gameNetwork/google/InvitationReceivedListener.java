@@ -28,6 +28,10 @@ public class InvitationReceivedListener extends Listener implements OnInvitation
 		super(_dispatcher, _listener);
 	}
 
+	public void onInvitationRemoved(String invitationId) {
+		
+	}
+
 	public void onInvitationReceived(Invitation invitation) {
 		if (fListener < 0) {
 			return;

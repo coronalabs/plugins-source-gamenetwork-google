@@ -298,7 +298,7 @@ public class LuaLoader implements JavaFunction {
 						@Override
 						public void run() {
 							if (CoronaEnvironment.getCoronaActivity() != null) {
-								CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getSelectPlayersIntent(finalMin, finalMax), finalRequestCode);
+								CoronaEnvironment.getCoronaActivity().startActivityForResult(finalHelper.getGamesClient().getRealTimeSelectOpponentsIntent(finalMin, finalMax), finalRequestCode);
 							}
 						}
 					});	
@@ -533,11 +533,11 @@ public class LuaLoader implements JavaFunction {
 
 		} else if (requestedAction.equals("loadAchievements") || requestedAction.equals("loadAchievementDescriptions")) {
 			if (isConnected()) {
-				helper.getGamesClient().loadAchievements(new LoadAchievementsListener(fDispatcher, listener));
+				helper.getGamesClient().loadAchievements(new LoadAchievementsListener(fDispatcher, listener), true);
 			}
 		} else if (requestedAction.equals("loadLeaderboardCategories")) {
 			if (isConnected()) {
-				helper.getGamesClient().loadLeaderboardMetadata(new LoadLeaderboardCategoriesListener(fDispatcher, listener));
+				helper.getGamesClient().loadLeaderboardMetadata(new LoadLeaderboardCategoriesListener(fDispatcher, listener), true);
 			}
 		} else if (requestedAction.equals("createRoom")) {
 			if (isConnected()) {
