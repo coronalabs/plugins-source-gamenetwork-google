@@ -6,50 +6,44 @@
 > __Library__           [gameNetwork.*][api.library.gameNetwork]
 > __Return value__      none
 > __Revision__          [REVISION_LABEL](REVISION_URL)
-> __Keywords__          gameNetwork, game center
-> __Sample code__       */CoronaSDK/SampleCode/GameNetwork/GameCenter*, */CoronaSDK/SampleCode/GameNetwork/CoronaCloud*
-> __See also__          [gameNetwork.request()][plugin.gameNetwork-google.request]<br/>[gameNetwork.show()][plugin.gameNetwork-google.show]
+> __Keywords__          gameNetwork, Google Play Game Services
+> __See also__          [gameNetwork.request()][plugin.gameNetwork-google.request]
+>								[gameNetwork.show()][plugin.gameNetwork-google.show]
 > --------------------- ------------------------------------------------------------------------------------------
 
 
 ## Overview
 
-Initializes an app required by the game network provider.
+Initializes an app for use with Google Play Game Services.
 
-**NOTE:** Using the gameNetwork API will enable Corona Launchpad regardless of the setting in config.lua.
 
 ## Syntax
-
-	gameNetwork.init( providerName [, ...] )
-	
-##### providerName ~^(required)^~
-_[String][api.type.String]._ Name of the gameNetwork provider to initialize. The following string is valid:
-
-* `"google"`: Only available on Android.
-
-## Providers
-
-### Google Play game services
-
-Google Play game services is currently only avaliable on Android.
 
 	gameNetwork.init( "google" [, initCallback] )
 
 ##### initCallback ~^(optional)^~
-_[Listener][api.type.Listener]._ If "google" is specified as `providerName`, this is a callback function. On successful login, `event.isError` will be 'nil'. On unsuccessful init, `event.isError` will be 'true'. When problems such as network errors occur, `event.errorCode` (integer) and `event.errorMessage` (string) will be defined. 
+_[Listener][api.type.Listener]._ Callback function where, upon successful login, `event.isError` will be `nil`. On unsuccessful login, `event.isError` will be `true`. When problems such as network errors occur, `event.errorCode` ([integer][api.type.Number]) and `event.errorMessage` ([string][api.type.String]) will be defined. 
+
+
+## Example
 
 `````lua
-local gameNetwork = require "gameNetwork"
+local gameNetwork = require( "gameNetwork" )
 
 local function initCallback( event )
 	if not event.isError then
-		loggedIntoGC = true
-        native.showAlert( "Success!", "", { "OK" } )
-    else
-    	native.showAlert( "Failed!", event.errorMessage, {"OK"})
-    	print("Error Code: ", event.errorCode)
+		native.showAlert( "Success!", "", { "OK" } )
+	else
+		native.showAlert( "Failed!", event.errorMessage, { "OK" } )
+		print( "Error Code:", event.errorCode )
 	end
 end
 
-gameNetwork.init( "gameNetwork", initCallback )
+local function onSystemEvent( event )
+	if ( event.type == "applicationStart" ) then
+		gameNetwork.init( "google", initCallback )
+		return true
+	end
+end
+Runtime:addEventListener( "system", onSystemEvent )
 `````

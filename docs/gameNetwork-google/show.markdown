@@ -1,13 +1,12 @@
-
 # gameNetwork.show()
 
 > --------------------- ------------------------------------------------------------------------------------------
 > __Type__              [Function][api.type.Function]
 > __Library__           [gameNetwork.*][api.library.gameNetwork]
 > __Revision__          [REVISION_LABEL](REVISION_URL)
-> __Keywords__          gameNetwork, show, leaderboards, achievements
-> __Sample code__       
-> __See also__          [gameNetwork.init()][plugin.gameNetwork-google.init]<br/>[gameNetwork.request()][plugin.gameNetwork-google.request]
+> __Keywords__          gameNetwork, Google Play Game Services
+> __See also__          [gameNetwork.init()][plugin.gameNetwork-google.init]
+>								[gameNetwork.request()][plugin.gameNetwork-google.request]
 > --------------------- ------------------------------------------------------------------------------------------
 
 
@@ -15,14 +14,13 @@
 
 Displays the requested game network information to the user.
 
+
 ## Syntax
 
-	gameNetwork.show( name [, data ] )
+	gameNetwork.show( command [, params ] )
 
-##### name ~^(required)^~
-_[String][api.type.String]._ Supports the following strings:
-
-**Google Play game services:**
+##### command ~^(required)^~
+_[String][api.type.String]._ String value as supported by Google Play Game Services:
 
 * `"leaderboards"`
 * `"achievements"`
@@ -31,102 +29,126 @@ _[String][api.type.String]._ Supports the following strings:
 * `"invitations"`
 
 ##### params ~^(optional)^~
-The following parameters are supported for the corresponding game networks:
+_[Table][api.type.Table]._ Table of parameters allowed by Google Play Game Services &mdash; see the next section for details.
 
-#### Google Play game services:
 
-**leaderboards:** View the leaderboard screen.  From this screen you can navigate to all the different types of leaderboards.  This function does not take a callback
+## Parameter Reference
 
-Example "leaderboards" request:
+Depending on the specified `command` parameter, the contents of the `params` table will vary.
 
-`````lua
--- Display the leaderboard.
+#### Listener Function
+
+For most calls to `gameNetwork.show()`, the `params` table supports a `listener` key with its value as a callback function to monitor the call result, for example:
+
+``````lua
+gameNetwork.show( "invitations", { listener=invitationListener } )
+``````
+
+#### Leaderboards
+
+For the `command` parameter of `"leaderboards"`, this function shows the leaderboard screen. Once there, the user can navigate to the different types of leaderboards. This function does not require a `params` table or callback listener.
+
+``````lua
 gameNetwork.show( "leaderboards" )
+``````
 
-`````
+#### Achievements
 
-**achievements:** View the achievements screen.  It shows the achievements that the player has and has not obtained yet.  This function does not take a callback
+For the `command` parameter of `"achievements"`, this function shows the achievements screen. This screen includes both achievements that the player has obtained and those achievements not yet obtained. This function does not require a `params` table or callback listener.
 
-Example "achievements" request:
-
-````lua
--- Display the player's achievements.
+``````lua
 gameNetwork.show( "achievements" )
+``````
 
-````
+#### Select Players
 
-**selectPlayers:** Shows a screen where the player can select which players to invite to a game or choose to auto match players.
+For the `command` parameter of `"selectPlayers"`, this function shows a screen where the player can select which players to invite to a game or, alternatively, choose to use <nobr>auto-match</nobr>.
 
-event.data in callback listener is an array of items that have the following properties:
-* maxAutoMatchPlayers (number)
-* minAutoMatchPlayers (number)
-* phase (string)
-* array
-
-````lua
-local function selectPlayersListener(event)
-	print(event.data[1], event.data[2], event.data[3]) -- prints the selected player ids
-	print(event.data.maxAutoMatchPlayers) -- prints the maximum number of auto match players
-	print(event.data.minAutoMatchPlayers) -- prints the minimum number of auto match players
-	print(event.data.phase) -- prints the phase, either "selected" or "cancelled"
+``````lua
+local function selectPlayersListener( event )
+	print( event.data[1], event.data[2], event.data[3] ) --selected player IDs
+	print( event.data.minAutoMatchPlayers )
+	print( event.data.maxAutoMatchPlayers )
+	print( event.data.phase )
 end
 
--- Display the screen to select players for multiplayer
-gameNetwork.show("selectPlayers", 
+gameNetwork.show( "selectPlayers",
 	{
-		listener = selectPlayersListener,
-		minPlayers = 1, -- This does NOT include the current player
-		maxPlayers = 3  -- This does NOT include the current player
-	})
+		minPlayers = 1,  --this value does not include the current player
+		maxPlayers = 3,  --this value does not include the current player
+		listener = selectPlayersListener
+	}
+)
+``````
 
-````
+Inside the the `params` table, the following optional keys apply:
 
-**waitingRoom:** Shows the waiting room screen
+* `minPlayers` &mdash; Number which specifies the minimum number of players in a multiplayer game. This value does __not__ include the current player.
 
-event.data in callback listener is an array of items that have the following properties:
-* isError (boolean)
-* phase (string)
-* roomID (string)
-* array
+* `maxPlayers` &mdash; Number which specifies the maximum number of players in a multiplayer game. This value does __not__ include the current player.
 
-````lua
-local function waitingRoomListener(event)
-	print(event.type) -- "waitingRoom"
-	print(event.data.isError)
-	print(event.data.phase) -- "start" when the game can start, "cancel" when the user exited the waiting room screen, this will leave the room automatically
-	print(event.data.roomID) -- The roomId of the room the waiting room is for
-	print(event.data[1], event.data[2], event.data[3]) -- The participantIds of the room
+When handling the results of a `"selectPlayers"` call, `event.data` in the callback listener contains an array of player&nbsp;IDs selected. Additionally, `event.data` contains the following properties:
+
+* `minAutoMatchPlayers` ([number][api.type.Number]) &mdash; The minimum number of <nobr>auto-matched</nobr> players.
+* `maxAutoMatchPlayers` ([number][api.type.Number]) &mdash; The maximum number of <nobr>auto-matched</nobr> players.
+* `phase` ([string][api.type.String]) &mdash; The phase value of either `"selected"` or `"cancelled"`.
+
+#### Waiting Room
+
+For the `command` parameter of `"waitingRoom"`, this function shows the waiting room screen.
+
+``````lua
+local function waitingRoomListener( event )
+	print( event.type )  --"waitingRoom"
+	print( event.data[1], event.data[2], event.data[3] )  --participant IDs
+	print( event.data.roomID )
+	print( event.data.phase )
+	print( event.data.isError )
 end
 
 -- Display the waiting room screen for a specific room
--- If the user exits the waiting room then the user will exit the room automatically
-gameNetwork.show("waitingRoom", 
+-- If the user exits the waiting room, he/she will exit the room automatically
+gameNetwork.show( "waitingRoom",
 	{
-		listener = waitingRoomListener,
 		roomID = "3487324234",
-		minPlayers = 2, -- The minimum number of players before the game can start
-	})
+		minPlayers = 2,
+		listener = waitingRoomListener
+	}
+)
+``````
 
-````
+Inside the the `params` table, the following keys apply:
 
-**invitations:** Shows the current invitations for the user
+* `roomID` &mdash; String value representing the room ID of the waiting room.
 
-event.data in callback listener is an array of items that have the following properties:
-* roomID (string)
-* phase (string)
-* isError (boolean)
+* `minPlayers` &mdash; Specifies the minimum number of players required before the game can begin.
+
+When handling the results of a `"waitingRoom"` call, `event.data` in the callback listener contains an array of participant&nbsp;IDs. Additionally, `event.data` contains the following properties:
+
+* `roomID` ([string][api.type.String]) &mdash; The room ID of the waiting room.
+* `phase` ([string][api.type.String]) &mdash; Value of `"start"` when the game can begin or `"cancel"` if the user exited the waiting room screen.
+* `isError` ([boolean][api.type.Boolean]) &mdash; Boolean specifying if an error occurred or not.
+
+#### Invitations
+
+For the `command` parameter of `"invitations"`, this function shows the current invitations for the user.
 
 ````lua
-local function invitationListener(event)
-	print(event.data.roomID) -- The id of the room the player selected to accept the invitation to
-	print(event.data.phase) -- The phase, either "selected" or "cancelled"
-	print(event.data.isError)
+local function invitationListener( event )
+	print( event.data.roomID )
+	print( event.data.phase )
+	print( event.data.isError )
 end
 
--- Display the invitations management screen
-gameNetwork.show("invitations", 
+gameNetwork.show( "invitations",
 	{
 		listener = invitationListener
-	})
-
+	}
+)
 `````
+
+When handling the results of a `"invitations"` call, `event.data` in the callback listener contains the following properties:
+
+* `roomID` ([string][api.type.String]) &mdash; ID of the room the player selected.
+* `phase` ([string][api.type.String]) &mdash; The phase value of either `"selected"` or `"cancelled"`.
+* `isError` ([boolean][api.type.Boolean]) &mdash; Boolean specifying if an error occurred or not.
