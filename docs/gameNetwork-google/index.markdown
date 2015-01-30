@@ -1,30 +1,22 @@
-
-# gameNetwork.*
+# Google Play Game Services
 
 > --------------------- ------------------------------------------------------------------------------------------
 > __Type__              [Library][api.type.Library]
 > __Revision__          [REVISION_LABEL](REVISION_URL)
-> __Keywords__          gameNetwork, game center, game services
-> __Sample code__       
-> __See also__          
+> __Keywords__          gameNetwork, Google Play Game Services
 > __Availability__      Starter, Basic, Pro, Enterprise
+> __Platforms__			Android
 > --------------------- ------------------------------------------------------------------------------------------
 
 ## Overview
 
-Corona's game network API allows access to social gaming features such as public leaderboards and achievements.
+[Google Play Game Services](http://developer.android.com/google/play-services/games.html) makes your games more social with capabilities for achievements, leaderboards, and other popular features using the Google Play game services SDK. Let players sign in using their Google+ identities and share their gaming experience with friends.
 
-**NOTE:** Using the gameNetwork API will enable Corona Launchpad regardless of the setting in config.lua.
 
-## Platforms
+## Syntax
 
-The following platforms are supported:
+	local gameNetwork = require( "gameNetwork" )
 
-* Android
-
-#### Google Play game services
-
-This is currently a feature that is only supported on Android. It is not supported by the Corona Simulator.
 
 ## Functions
 
@@ -34,31 +26,46 @@ This is currently a feature that is only supported on Android. It is not support
 
 #### [gameNetwork.show()][plugin.gameNetwork-google.show]
 
-## build.settings
 
-The following build.settings section is required to for Google Play game services
+## Project Settings
+
+To use this plugin, add an entry into the `plugins` table of `build.settings`. When added, the build server will integrate the plugin during the build phase.
+
+``````lua
+settings =
+{
+	plugins =
+	{
+		["CoronaProvider.gameNetwork.google"] =
+		{
+			publisherId = "com.coronalabs",
+			supportedPlatforms = { android=true },
+		},
+	},
+}
+``````
+
+In addition, you must specify the Google Play Games App ID within the `android` table of `build.settings`:
 
 ``````lua
 settings =
 {
 	android =
 	{
-		googlePlayGamesAppId = "123456789012", -- Your Google Play Games App Id
-	},
-	plugins =
-	{
-		-- key is the name passed to Lua's 'require()'
-		["CoronaProvider.gameNetwork.google"] =
-		{
-			-- required
-			publisherId = "com.coronalabs",
-			supportedPlatforms = { android = true }
-		},
+		googlePlayGamesAppId = "123456789012",
 	},
 }
 ``````
 
+
 ## Sample Code
 
-You can access sample code for leaderboards and achievements [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google).
-You can access sample code for real time multiplayer [here](https://github.com/coronalabs/plugins-sample-gameNetwork-google-gemwars).
+* Leaderboards and achievements &mdash; [https://github.com/coronalabs/plugins-sample-gameNetwork-google/](https://github.com/coronalabs/plugins-sample-gameNetwork-google)
+
+* Real-time multiplayer &mdash; [https://github.com/coronalabs/plugins-sample-gameNetwork-google-gemwars/](https://github.com/coronalabs/plugins-sample-gameNetwork-google-gemwars)
+
+
+## Support
+
+* [http://developer.android.com/google/play-services/games.html](http://developer.android.com/google/play-services/games.html)
+* [Corona Forums](http://forums.coronalabs.com/forum/621-game-networking/)
